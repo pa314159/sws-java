@@ -1,0 +1,12 @@
+bin/
+gen/
+target/
+lib/
+classes/
+*.log
+*.tmp
+*.jdbc
+local.properties
+.project
+.classpath
+.settings

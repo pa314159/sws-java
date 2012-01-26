@@ -124,11 +124,6 @@ implements LifeCycle
 		return this.exec.getCorePoolSize();
 	}
 
-	public void rejectedExecution( Runnable r, ThreadPoolExecutor executor )
-	{
-		r.run();
-	}
-
 	public void setKeepAliveTime( long time, TimeUnit unit )
 	{
 		this.exec.setKeepAliveTime( time, unit );

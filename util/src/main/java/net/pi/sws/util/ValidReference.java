@@ -21,7 +21,7 @@ public final class ValidReference<T>
 
 	public enum Type
 	{
-		NULL,
+		NONE,
 		WEAK,
 		SOFT
 	}
@@ -48,7 +48,7 @@ public final class ValidReference<T>
 
 	public ValidReference()
 	{
-		this( Type.NULL );
+		this( Type.NONE );
 	}
 
 	public ValidReference( ValidReference.Type type )
@@ -134,7 +134,7 @@ public final class ValidReference<T>
 	public T getAsIs()
 	{
 		switch( this.type ) {
-			case NULL:
+			case NONE:
 				return (T) this.value;
 
 			default:
@@ -185,7 +185,7 @@ public final class ValidReference<T>
 	{
 		try {
 			switch( this.type ) {
-				case NULL:
+				case NONE:
 					this.value = value;
 				break;
 

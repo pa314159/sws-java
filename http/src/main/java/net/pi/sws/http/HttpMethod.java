@@ -35,7 +35,15 @@ public abstract class HttpMethod
 
 	private ReadableByteChannel		ic;
 
+	private InputStream				is;
+
+	private boolean					gotI;
+
 	private WritableByteChannel		oc;
+
+	private OutputStream			os;
+
+	private boolean					gotO;
 
 	private final String			version;
 
@@ -101,16 +109,36 @@ public abstract class HttpMethod
 
 	protected ReadableByteChannel getInputChannel() throws IOException
 	{
+		if( this.is != null ) {
+			throw new IllegalStateException( "Already called getInputStream() " );
+		}
+
+		this.gotI = true;
+
 		return this.ic;
 	}
 
 	protected InputStream getInputStream() throws IOException
 	{
-		return new ChannelInputStream( this.ic );
+		if( this.gotI ) {
+			throw new IllegalStateException( "Already called getInputChannel() " );
+		}
+
+		if( this.is != null ) {
+			return this.is;
+		}
+
+		return this.is = new ChannelInputStream( this.ic );
 	}
 
 	protected WritableByteChannel getOutputChannel() throws IOException
 	{
+		if( this.os != null ) {
+			throw new IllegalStateException( "Already called getOutputStream() " );
+		}
+
+		this.gotO = true;
+
 		flushHead();
 
 		return this.oc;
@@ -118,9 +146,17 @@ public abstract class HttpMethod
 
 	protected OutputStream getOutputStream() throws IOException
 	{
+		if( this.gotO ) {
+			throw new IllegalStateException( "Already called getOutputChannel() " );
+		}
+
 		flushHead();
 
-		return new ChannelOutputStream( this.oc );
+		if( this.os != null ) {
+			return this.os;
+		}
+
+		return this.os = new ChannelOutputStream( this.oc );
 	}
 
 	protected final void setStatus( HttpCode code ) throws IOException

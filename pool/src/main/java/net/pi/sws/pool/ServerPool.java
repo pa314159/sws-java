@@ -2,7 +2,6 @@
 package net.pi.sws.pool;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ClosedSelectorException;
@@ -106,21 +105,18 @@ implements LifeCycle
 
 	private final Selector				sel;
 
-	private final ServerSocketChannel	chn;
-
 	private final ServiceFactory		fact;
 
 	private Loop						loop;
 
+	private final SocketAddress			address;
+
 	public ServerPool( SocketAddress a, ServiceFactory fact ) throws IOException
 	{
+		this.address = a;
 		this.sel = Selector.open();
-		this.chn = ServerSocketChannel.open();
 
-		this.chn.socket().setReuseAddress( true );
-		this.chn.socket().bind( a );
-		this.chn.configureBlocking( false );
-		this.chn.register( this.sel, SelectionKey.OP_ACCEPT );
+		bind( a );
 
 		this.fact = fact;
 
@@ -131,9 +127,25 @@ implements LifeCycle
 			new ArrayBlockingQueue<Runnable>( 20 ), tf, new RejectPolicy() );
 	}
 
-	public InetSocketAddress getAddress()
+	/**
+	 * Binds the primary and additional socket address.
+	 * 
+	 * @param address
+	 * @throws IOException
+	 */
+	public void bind( SocketAddress address ) throws IOException
 	{
-		return (InetSocketAddress) this.chn.socket().getLocalSocketAddress();
+		final ServerSocketChannel chn = ServerSocketChannel.open();
+
+		chn.socket().setReuseAddress( true );
+		chn.socket().bind( address );
+		chn.configureBlocking( false );
+		chn.register( this.sel, SelectionKey.OP_ACCEPT );
+	}
+
+	public SocketAddress getAddress()
+	{
+		return this.address;
 	}
 
 	public long getKeepAliveTime( TimeUnit unit )
@@ -180,7 +192,10 @@ implements LifeCycle
 
 		this.exec.shutdown();
 
-		this.chn.close();
+		for( final SelectionKey sk : this.sel.keys() ) {
+			sk.channel().close();
+		}
+
 		this.sel.close();
 
 		this.exec.awaitTermination( timeout, TimeUnit.MILLISECONDS );
@@ -204,10 +219,11 @@ implements LifeCycle
 			final Iterator<SelectionKey> it = this.sel.selectedKeys().iterator();
 
 			while( it.hasNext() ) {
-				it.next();
+				final ServerSocketChannel chn = (ServerSocketChannel) it.next().channel();
+
 				it.remove();
 
-				this.exec.execute( new Handler( this.chn.accept() ) );
+				this.exec.execute( new Handler( chn.accept() ) );
 			}
 		}
 	}

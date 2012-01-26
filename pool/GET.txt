@@ -1,0 +1,8 @@
+GET / HTTP/1.1
+Host: localhost:31416
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:9.0.1) Gecko/20100101 Firefox/9.0.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en,ro;q=0.5
+Accept-Encoding: gzip, deflate
+Accept-Charset: UTF-8,*
+Connection: keep-alive

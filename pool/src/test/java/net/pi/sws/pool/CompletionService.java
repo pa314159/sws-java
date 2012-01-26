@@ -3,21 +3,18 @@ package net.pi.sws.pool;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import net.pi.sws.util.ValidReference;
+import net.pi.sws.util.ValidReference.Type;
 
 public class CompletionService
-implements Service
+implements Service, ValidReference.Check<Throwable>
 {
 
-	private final Service	service;
+	private final Service					service;
 
-	private final Lock		lock	= new ReentrantLock();
+	private final ValidReference<Throwable>	result	= new ValidReference<Throwable>( Type.NONE, this );
 
-	private final Condition	cond	= this.lock.newCondition();
-
-	private Throwable		result;
+	private boolean							done;
 
 	CompletionService( Service service )
 	{
@@ -27,44 +24,41 @@ implements Service
 	@Override
 	public void accept( SocketChannel channel ) throws IOException
 	{
-		this.lock.lock();
+		Throwable x = null;
 
 		try {
 			this.service.accept( channel );
 		}
 		catch( final IOException t ) {
-			this.result = t;
+			x = t;
 
 			throw t;
 		}
 		catch( final RuntimeException t ) {
-			this.result = t;
+			x = t;
 
 			throw t;
 		}
 		catch( final Throwable t ) {
-			this.result = t;
+			x = t;
 
 			throw new IOException( t );
 		}
 		finally {
-			this.cond.signalAll();
+			this.done = true;
 
-			this.lock.unlock();
+			this.result.set( x );
 		}
 	}
 
 	public Throwable getResult() throws InterruptedException
 	{
-		this.lock.lock();
+		return this.result.get();
+	}
 
-		try {
-			this.cond.await();
-
-			return this.result;
-		}
-		finally {
-			this.lock.unlock();
-		}
+	@Override
+	public boolean isValid( Throwable value )
+	{
+		return this.done;
 	}
 }

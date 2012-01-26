@@ -24,7 +24,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									 <mainClass>net.pi.sws.pool.Main</mainClass>
+									 <mainClass>net.pi.sws.echo.Echo</mainClass>
 								</manifest>
 							</archive>
 						</configuration>

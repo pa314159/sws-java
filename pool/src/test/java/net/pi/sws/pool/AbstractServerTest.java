@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 
+import net.pi.sws.echo.EchoService;
 import net.pi.sws.util.ValidReference;
 
 import org.junit.After;
@@ -22,7 +23,7 @@ implements ServiceFactory
 
 	public Service create( SocketChannel channel ) throws IOException
 	{
-		final CompletionService serv = new CompletionService( new LineReaderService( "UTF-8", channel ) );
+		final CompletionService serv = new CompletionService( new EchoService( "UTF-8", channel ) );
 
 		this.service.set( serv );
 

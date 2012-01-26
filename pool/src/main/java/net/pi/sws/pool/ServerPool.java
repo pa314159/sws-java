@@ -15,6 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.pi.sws.util.ExtLog;
+import net.pi.sws.util.NamedThreadFactory;
 
 import org.apache.commons.io.IOUtils;
 

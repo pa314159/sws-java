@@ -16,7 +16,7 @@ extends AbstractServerTest
 	@Before
 	public void setUp() throws IOException
 	{
-		this.fact = new HttpServiceFactory( new File( "target" ) );
+		this.fact = new HttpServiceFactory( new File( "." ) );
 
 		super.setUp();
 	}

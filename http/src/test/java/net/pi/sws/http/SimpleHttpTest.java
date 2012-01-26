@@ -23,7 +23,7 @@ extends AbstractHttpTest
 	public void get() throws ClientProtocolException, IOException
 	{
 		final HttpClient client = new DefaultHttpClient();
-		final HttpRequest get = new HttpGet( "/" );
+		final HttpRequest get = new HttpGet( "/GET.txt" );
 		final InetSocketAddress sock = (InetSocketAddress) this.pool.getAddress();
 		final HttpHost host = new HttpHost( sock.getHostName(), sock.getPort() );
 		final HttpResponse resp = client.execute( host, get );
@@ -37,7 +37,7 @@ extends AbstractHttpTest
 	public void head() throws ClientProtocolException, IOException
 	{
 		final HttpClient client = new DefaultHttpClient();
-		final HttpRequest get = new HttpHead( "/" );
+		final HttpRequest get = new HttpHead( "/HEAD.txt" );
 		final InetSocketAddress sock = (InetSocketAddress) this.pool.getAddress();
 		final HttpHost host = new HttpHost( sock.getHostName(), sock.getPort() );
 		final HttpResponse resp = client.execute( host, get );

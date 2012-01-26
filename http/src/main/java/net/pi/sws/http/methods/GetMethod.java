@@ -6,8 +6,14 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 
-import net.pi.sws.util.IO;
+import net.pi.sws.http.HTTP;
 
+/**
+ * Implementation of GET.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
+@HTTP( "GET" )
 public class GetMethod
 extends HeadMethod
 {
@@ -18,7 +24,7 @@ extends HeadMethod
 	}
 
 	@Override
-	protected void execute( File file ) throws IOException
+	protected void send( File file ) throws IOException
 	{
 		if( file.isFile() ) {
 			final RandomAccessFile r = new RandomAccessFile( file, "r" );

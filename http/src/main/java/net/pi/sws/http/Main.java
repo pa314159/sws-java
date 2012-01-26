@@ -73,6 +73,9 @@ public class Main
 
 	private Main( String host, int port, File root ) throws IOException
 	{
+		// preload methods
+		MethodFactory.getInstance();
+
 		final SocketAddress bind = new InetSocketAddress( host, port );
 		final HttpServiceFactory fact = new HttpServiceFactory( root );
 

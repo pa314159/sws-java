@@ -147,4 +147,20 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<id>sws-releases</id>
+			<url>${sws-releases-url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>sws-snapshots</id>
+			<url>${sws-snapshots-url}</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
+	<scm>
+		<connection>scm:git:${sws-scm-url}:sws</connection>
+		<developerConnection>scm:git:${sws-scm-url}:sws</developerConnection>
+	</scm>
 </project>

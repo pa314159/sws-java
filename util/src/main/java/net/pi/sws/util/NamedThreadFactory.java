@@ -1,10 +1,10 @@
 
-package net.pi.sws.pool;
+package net.pi.sws.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ThreadFactory;
 
-class NamedThreadFactory
+public class NamedThreadFactory
 implements ThreadFactory
 {
 
@@ -18,7 +18,7 @@ implements ThreadFactory
 
 	private UncaughtExceptionHandler	eh			= Thread.getDefaultUncaughtExceptionHandler();
 
-	NamedThreadFactory( String format, boolean daemon )
+	public NamedThreadFactory( String format, boolean daemon )
 	{
 		this.format = format;
 		this.daemon = daemon;

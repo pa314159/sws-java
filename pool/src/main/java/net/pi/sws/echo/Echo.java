@@ -1,11 +1,18 @@
 
-package net.pi.sws.pool;
+package net.pi.sws.echo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.channels.SocketChannel;
 
-public class Main
+import net.pi.sws.pool.ServerPool;
+import net.pi.sws.pool.Service;
+import net.pi.sws.pool.ServiceFactory;
+import net.pi.sws.util.ExtLog;
+
+public class Echo
+implements ServiceFactory
 {
 
 	static class ShutdownHook
@@ -26,13 +33,15 @@ public class Main
 				this.pool.stop( 500 );
 			}
 			catch( final InterruptedException e ) {
-				e.printStackTrace();
+				L.error( "stop hook", e );
 			}
 			catch( final IOException e ) {
-				e.printStackTrace();
+				L.error( "stop hook", e );
 			}
 		}
 	}
+
+	static private final ExtLog	L	= ExtLog.get();
 
 	static public void main( String[] args ) throws IOException
 	{
@@ -54,19 +63,32 @@ public class Main
 			break;
 
 			default:
-				System.err.println( "Usage: java -jar sws-pool.jar host port" );
+				System.err.println( "Usage: java -jar sws-pool.jar [host] port" );
 				System.exit( 1 );
 
 				// probably unreachable :)
 				return;
 		}
 
-		final DefaultServiceFactory fact = new DefaultServiceFactory();
+		new Echo( host, port ).go();
+	}
+
+	private final ServerPool	pool;
+
+	private Echo( String host, int port ) throws IOException
+	{
 		final SocketAddress bind = new InetSocketAddress( host, port );
-		final ServerPool pool = new ServerPool( bind, fact );
 
-		pool.start();
+		this.pool = new ServerPool( bind, this );
+	}
 
-		Runtime.getRuntime().addShutdownHook( new ShutdownHook( pool ) );
+	public Service create( SocketChannel chn ) throws IOException
+	{
+		return new EchoService( "UTF-8", chn );
+	}
+
+	private void go() throws IOException
+	{
+		this.pool.start();
 	}
 }

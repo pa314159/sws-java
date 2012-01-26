@@ -4,6 +4,7 @@ package net.pi.sws.pool;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -11,6 +12,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -43,6 +45,9 @@ implements LifeCycle
 
 				ServerPool.this.fact.create( this.chn ).accept( this.chn );
 			}
+			catch( final ClosedByInterruptException e ) {
+				L.info( "accept closed" );
+			}
 			catch( final Throwable t ) {
 				L.error( "error in accept handler", t );
 			}
@@ -51,6 +56,13 @@ implements LifeCycle
 
 				L.info( "accept finished" );
 			}
+		}
+
+		void reject()
+		{
+			L.info( "REJECTED" );
+
+			IOUtils.closeQuietly( this.chn );
 		}
 	}
 
@@ -71,6 +83,19 @@ implements LifeCycle
 			}
 			finally {
 				L.info( "Loop exited" );
+			}
+		}
+	}
+
+	static class RejectPolicy
+	implements RejectedExecutionHandler
+	{
+
+		@Override
+		public void rejectedExecution( Runnable r, ThreadPoolExecutor executor )
+		{
+			if( r instanceof Handler ) {
+				((Handler) r).reject();
 			}
 		}
 	}
@@ -103,7 +128,7 @@ implements LifeCycle
 
 		// XXX review this
 		this.exec = new ThreadPoolExecutor( 20, 20, 0L, TimeUnit.MILLISECONDS,
-			new ArrayBlockingQueue<Runnable>( 20 ), tf, new ThreadPoolExecutor.DiscardPolicy() );
+			new ArrayBlockingQueue<Runnable>( 20 ), tf, new RejectPolicy() );
 	}
 
 	public InetSocketAddress getAddress()

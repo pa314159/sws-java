@@ -1,8 +1,10 @@
 
-package net.pi.sws.pool;
+package net.pi.sws.http;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+
+import net.pi.sws.pool.AbstractServerTest;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;

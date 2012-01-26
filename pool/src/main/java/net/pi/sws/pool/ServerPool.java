@@ -3,7 +3,7 @@ package net.pi.sws.pool;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -30,38 +30,42 @@ implements LifeCycle
 
 		private final SocketChannel	chn;
 
-		public Handler( SocketChannel chn ) throws IOException
+		public Handler( SelectionKey sk ) throws IOException
 		{
-			this.chn = chn;
+			this.chn = ((ServerSocketChannel) sk.channel()).accept();
 		}
 
 		public void run()
 		{
-
 			try {
 				this.chn.configureBlocking( false );
 				this.chn.socket().setTcpNoDelay( true );
 
 				ServerPool.this.fact.create( this.chn ).accept( this.chn );
 			}
-			catch( final ClosedByInterruptException e ) {
+			catch( final ClosedChannelException e ) {
 				L.info( "accept closed" );
 			}
 			catch( final Throwable t ) {
 				L.error( "error in accept handler", t );
 			}
 			finally {
-				IOUtils.closeQuietly( this.chn );
+				close();
 
 				L.info( "accept finished" );
 			}
 		}
 
+		void close()
+		{
+			IOUtils.closeQuietly( this.chn );
+		}
+
 		void reject()
 		{
-			L.info( "REJECTED" );
+			close();
 
-			IOUtils.closeQuietly( this.chn );
+			L.info( "REJECTED" );
 		}
 	}
 
@@ -219,11 +223,11 @@ implements LifeCycle
 			final Iterator<SelectionKey> it = this.sel.selectedKeys().iterator();
 
 			while( it.hasNext() ) {
-				final ServerSocketChannel chn = (ServerSocketChannel) it.next().channel();
+				final SelectionKey sk = it.next();
 
 				it.remove();
 
-				this.exec.execute( new Handler( chn.accept() ) );
+				this.exec.execute( new Handler( sk ) );
 			}
 		}
 	}

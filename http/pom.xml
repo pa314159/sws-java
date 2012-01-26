@@ -19,6 +19,11 @@
 			<artifactId>sws-pool</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.pi.sws</groupId>
+			<artifactId>sws-pool</artifactId>
+			<classifier>tests</classifier>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 		</dependency>

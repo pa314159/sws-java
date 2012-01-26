@@ -19,6 +19,7 @@
 	</modules>
 
 	<build>
+		<defaultGoal>install</defaultGoal>
 		<resources>
 			<resource>
 				<directory>${project.build.sourceDirectory}</directory>
@@ -52,7 +53,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -72,13 +72,36 @@
 				</configuration>
 			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3.1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- public artefacts -->
 			<dependency>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-http</artifactId>
+				<version>0.1-SNAPSHOT</version>
+			</dependency>
+
+			<!-- internal artefacts -->
+			<dependency>
+				<groupId>net.pi.sws</groupId>
+				<artifactId>sws-util</artifactId>
 				<version>0.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
@@ -88,10 +111,13 @@
 			</dependency>
 			<dependency>
 				<groupId>net.pi.sws</groupId>
-				<artifactId>sws-util</artifactId>
+				<artifactId>sws-pool</artifactId>
+				<classifier>tests</classifier>
 				<version>0.1-SNAPSHOT</version>
+				<scope>test</scope>
 			</dependency>
 
+			<!-- external dependencies -->
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>

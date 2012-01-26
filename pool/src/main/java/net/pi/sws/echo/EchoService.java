@@ -52,12 +52,12 @@ implements Service
 		this.rd.close();
 		this.wr.close();
 
-		EchoService.L.info( "DONE" );
+		L.info( "DONE" );
 	}
 
 	protected boolean processLine( String ln )
 	{
-		EchoService.L.info( "ECHO %s", ln );
+		L.trace( "ECHO %s", ln );
 
 		ln = ln.trim();
 

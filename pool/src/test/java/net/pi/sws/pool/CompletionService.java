@@ -1,3 +1,4 @@
+
 package net.pi.sws.pool;
 
 import java.io.IOException;
@@ -31,8 +32,20 @@ implements Service
 		try {
 			this.service.accept( channel );
 		}
+		catch( final IOException t ) {
+			this.result = t;
+
+			throw t;
+		}
+		catch( final RuntimeException t ) {
+			this.result = t;
+
+			throw t;
+		}
 		catch( final Throwable t ) {
 			this.result = t;
+
+			throw new IOException( t );
 		}
 		finally {
 			this.cond.signalAll();
@@ -55,4 +68,3 @@ implements Service
 		}
 	}
 }
-

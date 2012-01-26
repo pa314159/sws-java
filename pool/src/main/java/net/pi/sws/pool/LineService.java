@@ -10,33 +10,47 @@ import java.nio.charset.Charset;
 
 import net.pi.sws.util.ExtLog;
 
-public class LineService
+class LineService
 implements Service
 {
 
-	static private final ExtLog	L	= ExtLog.get();
+	static private final ExtLog		L	= ExtLog.get();
 
-	private final Charset		cs;
+	private final Charset			cs;
 
-	public LineService( String encoding )
+	private final BufferedReader	rd;
+
+	public LineService( String encoding, SocketChannel channel ) throws IOException
 	{
 		this.cs = Charset.forName( encoding );
+
+		channel.configureBlocking( true );
+
+		final InputStream is = channel.socket().getInputStream();
+
+		this.rd = new BufferedReader( new InputStreamReader( is, this.cs ) );
 	}
 
 	public void accept( SocketChannel channel ) throws IOException
 	{
-		final InputStream is = channel.socket().getInputStream();
-		final BufferedReader rd = new BufferedReader( new InputStreamReader( is, this.cs ) );
 		String ln = null;
 
-		while( (ln = rd.readLine()) != null ) {
-			processLine( ln );
+		while( (ln = this.rd.readLine()) != null ) {
+			if( processLine( ln ) ) {
+				break;
+			}
 		}
+
+		L.info( "DONE" );
 	}
 
-	protected void processLine( String ln )
+	protected boolean processLine( String ln )
 	{
 		L.info( "GOT %s", ln );
+
+		ln = ln.trim();
+
+		return ln.isEmpty();
 	}
 
 }

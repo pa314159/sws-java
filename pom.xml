@@ -156,6 +156,7 @@
 		<snapshotRepository>
 			<id>sws-snapshots</id>
 			<url>${sws-snapshots-url}</url>
+			<uniqueVersion>true</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>
 	

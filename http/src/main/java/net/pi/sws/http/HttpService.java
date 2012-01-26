@@ -40,7 +40,7 @@ implements Service
 		try {
 			final ChannelInputStream is = new ChannelInputStream( this.ic );
 			final BufferedReader rd = new BufferedReader( new InputStreamReader( is, "ISO-8859-1" ) );
-			final HttpMethod method = MethodFactory.getMethod( rd.readLine(), this.root );
+			final HttpMethod method = MethodFactory.getInstance().get( rd.readLine(), this.root );
 
 			String head = null;
 

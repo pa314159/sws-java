@@ -4,10 +4,17 @@ package net.pi.sws.http.methods;
 import java.io.File;
 import java.io.IOException;
 
+import net.pi.sws.http.HTTP;
 import net.pi.sws.http.HttpCode;
 import net.pi.sws.http.HttpHeader;
 import net.pi.sws.http.HttpMethod;
 
+/**
+ * Implementation of HEAD
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
+@HTTP( "HEAD" )
 public class HeadMethod
 extends HttpMethod
 {
@@ -17,8 +24,19 @@ extends HttpMethod
 		super( root, uri, version );
 	}
 
+	protected void send( File file ) throws IOException
+	{
+		if( file.isDirectory() ) {
+			addResponseHeader( new HttpHeader( "Content-Type", "text/html; charset=UTF-8" ) );
+		}
+		else {
+			addResponseHeader( new HttpHeader( "Content-Type", "application/octet-stream" ) );
+			addResponseHeader( new HttpHeader( "Content-Length", Long.toString( file.length() ) ) );
+		}
+	}
+
 	@Override
-	protected final void execute() throws IOException
+	protected final void respond() throws IOException
 	{
 		final File file = new File( this.root, getURI() );
 
@@ -26,18 +44,7 @@ extends HttpMethod
 			setStatus( HttpCode.S_NOT_FOUND );
 		}
 		else {
-			execute( file );
-		}
-	}
-
-	protected void execute( File file ) throws IOException
-	{
-		if( file.isDirectory() ) {
-			addHeader( new HttpHeader( "Content-Type", "text/html; charset=UTF-8" ) );
-		}
-		else {
-			addHeader( new HttpHeader( "Content-Type", "application/octet-stream" ) );
-			addHeader( new HttpHeader( "Content-Length", Long.toString( file.length() ) ) );
+			send( file );
 		}
 	}
 

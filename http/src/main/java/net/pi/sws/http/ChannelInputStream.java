@@ -4,39 +4,27 @@ package net.pi.sws.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 
-import net.pi.sws.util.IO;
-
-public class SocketChannelInputStream
+/**
+ * Use it instead of {@link Channels#newInputStream(ReadableByteChannel)}...
+ */
+class ChannelInputStream
 extends InputStream
 {
 
 	private final ReadableByteChannel	channel;
 
-	private final int					timeout;
-
-	private final Selector				sel;
-
-	SocketChannelInputStream( SocketChannel channel, int timeout ) throws IOException
+	ChannelInputStream( ReadableByteChannel channel ) throws IOException
 	{
-		this.sel = Selector.open();
-
-		channel.register( this.sel, SelectionKey.OP_READ );
-
 		this.channel = channel;
-		this.timeout = timeout;
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		this.sel.close();
-
-		super.close();
+		this.channel.close();
 	}
 
 	@Override
@@ -51,13 +39,7 @@ extends InputStream
 	@Override
 	public int read( byte[] b, int off, int len ) throws IOException
 	{
-		if( len == 0 ) {
-			return 0;
-		}
-
 		final ByteBuffer bb = ByteBuffer.wrap( b, off, len );
-
-		IO.select( this.sel, this.timeout );
 
 		return this.channel.read( bb );
 	}

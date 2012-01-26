@@ -2,6 +2,7 @@
 package net.pi.sws.http;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
@@ -27,7 +28,7 @@ final class MethodFactory
 		}
 	}
 
-	static HttpMethod getMethod( String head ) throws IOException
+	static HttpMethod getMethod( String head, File root ) throws IOException
 	{
 		final String[] parts = head.split( "\\s+" );
 
@@ -38,20 +39,20 @@ final class MethodFactory
 		final Constructor<? extends HttpMethod> ct = INSTANCE.methods.get( parts[0] );
 
 		if( ct == null ) {
-			return new BadMethod( head );
+			return new BadMethod( root, head );
 		}
 
 		try {
-			return ct.newInstance( parts[1], parts[2] );
+			return ct.newInstance( root, parts[1], parts[2] );
 		}
 		catch( final InstantiationException e ) {
-			return new BadMethod( head );
+			return new BadMethod( root, head );
 		}
 		catch( final IllegalAccessException e ) {
-			return new BadMethod( head );
+			return new BadMethod( root, head );
 		}
 		catch( final InvocationTargetException e ) {
-			return new BadMethod( head );
+			return new BadMethod( root, head );
 		}
 	}
 
@@ -67,7 +68,7 @@ final class MethodFactory
 			final Class<? extends HttpMethod> cls = (Class<? extends HttpMethod>) cld.loadClass( clsName );
 			final String metName = cls.getSimpleName().replaceAll( "Method$", "" ).toUpperCase();
 
-			final Constructor<? extends HttpMethod> ct = cls.getConstructor( String.class, String.class );
+			final Constructor<? extends HttpMethod> ct = cls.getConstructor( File.class, String.class, String.class );
 
 			this.methods.put( metName, ct );
 		}

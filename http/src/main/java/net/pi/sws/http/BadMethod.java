@@ -1,11 +1,12 @@
 
 package net.pi.sws.http;
 
+import java.io.File;
 import java.io.IOException;
 
 import net.pi.sws.util.ExtLog;
 
-class BadMethod
+final class BadMethod
 extends HttpMethod
 {
 
@@ -13,9 +14,9 @@ extends HttpMethod
 
 	static final String			VERSION	= "HTTP/1.0";
 
-	BadMethod( String head )
+	BadMethod( File root, String head ) throws IOException
 	{
-		super( head, VERSION );
+		super( root, head, VERSION );
 	}
 
 	@Override

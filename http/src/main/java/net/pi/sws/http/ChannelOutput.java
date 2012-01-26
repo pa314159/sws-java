@@ -2,7 +2,6 @@
 package net.pi.sws.http;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -11,8 +10,8 @@ import java.nio.channels.WritableByteChannel;
 
 import net.pi.sws.util.IO;
 
-public class SocketChannelOutputStream
-extends OutputStream
+class ChannelOutput
+implements WritableByteChannel
 {
 
 	private final WritableByteChannel	channel;
@@ -21,7 +20,7 @@ extends OutputStream
 
 	private final Selector				sel;
 
-	SocketChannelOutputStream( SocketChannel channel, int timeout ) throws IOException
+	ChannelOutput( SocketChannel channel, int timeout ) throws IOException
 	{
 		this.sel = Selector.open();
 
@@ -31,41 +30,34 @@ extends OutputStream
 		this.timeout = timeout;
 	}
 
-	@Override
 	public void close() throws IOException
 	{
 		this.sel.close();
-
-		super.close();
+		this.channel.close();
 	}
 
-	@Override
-	public void write( byte[] b, int off, int len ) throws IOException
+	public boolean isOpen()
 	{
-		final ByteBuffer bb = ByteBuffer.wrap( b, off, len );
+		return this.channel.isOpen();
+	}
 
-		while( len > 0 ) {
+	public int write( ByteBuffer src ) throws IOException
+	{
+		int total = 0;
+
+		while( src.remaining() > 0 ) {
 			IO.select( this.sel, this.timeout );
 
-			final int transferred = this.channel.write( bb );
+			final int transferred = this.channel.write( src );
 
-			if( transferred == 0 ) {
-				continue;
-			}
 			if( transferred < 0 ) {
 				throw new IOException();
 			}
 
-			len -= transferred;
-			off += transferred;
+			total += transferred;
 		}
+
+		return total;
 	}
 
-	@Override
-	public void write( int b ) throws IOException
-	{
-		final byte[] data = new byte[1];
-
-		write( data, 0, 1 );
-	}
 }

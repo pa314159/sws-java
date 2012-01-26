@@ -1,9 +1,13 @@
 
 package net.pi.sws.http;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +19,10 @@ public abstract class HttpMethod
 
 	static final byte[]				CRLF		= { 0x0D, 0x0A };
 
+	static final byte[]				COLON		= { 0x3A, 0x20 };
+
+	static final byte[]				SPACE		= { 0x20 };
+
 	static final Charset			ISO_8859_1;
 
 	static {
@@ -25,9 +33,9 @@ public abstract class HttpMethod
 
 	private final List<HttpHeader>	responseH	= new ArrayList<HttpHeader>();
 
-	private InputStream				is;
+	private ReadableByteChannel		ic;
 
-	private OutputStream			os;
+	private WritableByteChannel		oc;
 
 	private final String			version;
 
@@ -37,8 +45,11 @@ public abstract class HttpMethod
 
 	private final String			uri;
 
-	protected HttpMethod( String uri, String version )
+	protected final File			root;
+
+	protected HttpMethod( File root, String uri, String version ) throws IOException
 	{
+		this.root = root.getCanonicalFile();
 		this.uri = uri;
 		this.version = version;
 	}
@@ -50,23 +61,24 @@ public abstract class HttpMethod
 
 	private void flushHead() throws IOException
 	{
-		this.os.write( this.version.getBytes( ISO_8859_1 ) );
-		this.os.write( ' ' );
-		this.os.write( this.status.code );
-		this.os.write( ' ' );
-		this.os.write( this.status.text );
-		this.os.write( CRLF );
+		final BufferedOutputStream os = new BufferedOutputStream( new ChannelOutputStream( this.oc ) );
+
+		os.write( this.version.getBytes( ISO_8859_1 ) );
+		os.write( SPACE );
+		os.write( this.status.code );
+		os.write( SPACE );
+		os.write( this.status.text );
+		os.write( CRLF );
 
 		for( final HttpHeader h : this.responseH ) {
-			this.os.write( h.name.getBytes( ISO_8859_1 ) );
-			this.os.write( ':' );
-			this.os.write( ' ' );
-			this.os.write( h.content.getBytes( ISO_8859_1 ) );
-			this.os.write( CRLF );
+			os.write( h.name.getBytes( ISO_8859_1 ) );
+			os.write( COLON );
+			os.write( h.content.getBytes( ISO_8859_1 ) );
+			os.write( CRLF );
 		}
 
-		this.os.write( CRLF );
-		this.os.flush();
+		os.write( CRLF );
+		os.flush();
 
 		this.flushed = true;
 	}
@@ -87,16 +99,28 @@ public abstract class HttpMethod
 		return this.requestH.get( name );
 	}
 
-	protected InputStream getInputStream()
+	protected ReadableByteChannel getInputChannel() throws IOException
 	{
-		return this.is;
+		return this.ic;
+	}
+
+	protected InputStream getInputStream() throws IOException
+	{
+		return new ChannelInputStream( this.ic );
+	}
+
+	protected WritableByteChannel getOutputChannel() throws IOException
+	{
+		flushHead();
+
+		return this.oc;
 	}
 
 	protected OutputStream getOutputStream() throws IOException
 	{
 		flushHead();
 
-		return this.os;
+		return new ChannelOutputStream( this.oc );
 	}
 
 	protected final void setStatus( HttpCode code ) throws IOException
@@ -113,10 +137,10 @@ public abstract class HttpMethod
 		this.requestH.put( h.name, h );
 	}
 
-	final void forward( InputStream is, OutputStream os ) throws IOException
+	final void forward( ReadableByteChannel ic, WritableByteChannel oc ) throws IOException
 	{
-		this.is = is;
-		this.os = os;
+		this.ic = ic;
+		this.oc = oc;
 
 		setStatus( HttpCode.S_OK );
 		addHeader( new HttpHeader( "Server", "SWS/0.1 Simple Web Server" ) );

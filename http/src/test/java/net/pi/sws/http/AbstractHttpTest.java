@@ -1,11 +1,12 @@
 
 package net.pi.sws.http;
 
+import java.io.File;
 import java.io.IOException;
 
-import org.junit.Before;
-
 import net.pi.sws.pool.AbstractServerTest;
+
+import org.junit.Before;
 
 public abstract class AbstractHttpTest
 extends AbstractServerTest
@@ -15,7 +16,7 @@ extends AbstractServerTest
 	@Before
 	public void setUp() throws IOException
 	{
-		this.fact = new HttpServiceFactory();
+		this.fact = new HttpServiceFactory( new File( "target" ) );
 
 		super.setUp();
 	}

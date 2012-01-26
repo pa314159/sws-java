@@ -17,6 +17,14 @@ public class HttpHeader
 
 	private String	text;
 
+	public HttpHeader( String name, String content ) throws IOException
+	{
+		this.name = name;
+		this.content = content;
+
+		init();
+	}
+
 	HttpHeader( String line ) throws IOException
 	{
 		final int colon = line.indexOf( ':' );
@@ -27,14 +35,6 @@ public class HttpHeader
 
 		this.name = line.substring( 0, colon ).trim();
 		this.content = line.substring( colon + 1 ).trim();
-
-		init();
-	}
-
-	HttpHeader( String name, String content ) throws IOException
-	{
-		this.name = name;
-		this.content = content;
 
 		init();
 	}

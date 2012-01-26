@@ -1,6 +1,7 @@
 
 package net.pi.sws.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -43,34 +44,37 @@ public class Main
 		final String host;
 		final int port;
 
+		File root;
 		switch( args.length ) {
-			case 2:
+			case 3:
 				host = args[0];
 				port = Integer.parseInt( args[1] );
+				root = new File( args[1] );
 			break;
 
-			case 1:
+			case 2:
 				host = "0.0.0.0";
 				port = Integer.parseInt( args[0] );
+				root = new File( args[1] );
 			break;
 
 			default:
-				System.err.println( "Usage: java -jar sws-http.jar [host] port" );
+				System.err.println( "Usage: java -jar sws-http.jar [host] port root" );
 				System.exit( 1 );
 
 				// probably unreachable :)
 				return;
 		}
 
-		new Main( host, port ).go();
+		new Main( host, port, root ).go();
 	}
 
 	private final ServerPool	pool;
 
-	private Main( String host, int port ) throws IOException
+	private Main( String host, int port, File root ) throws IOException
 	{
 		final SocketAddress bind = new InetSocketAddress( host, port );
-		final HttpServiceFactory fact = new HttpServiceFactory();
+		final HttpServiceFactory fact = new HttpServiceFactory( root );
 
 		this.pool = new ServerPool( bind, fact );
 	}

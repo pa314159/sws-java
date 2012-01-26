@@ -4,6 +4,7 @@ package net.pi.sws.http;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.channels.SocketChannel;
@@ -15,25 +16,31 @@ public class HttpService
 implements Service
 {
 
-	private final BufferedInputStream	is;
+	private static final int	TIMEOUT	= 0;
 
-	private final BufferedOutputStream	os;
+	private final File			root;
 
-	HttpService( SocketChannel channel ) throws IOException
+	private final ChannelOutput	oc;
+
+	private final ChannelInput	ic;
+
+	HttpService( File root, SocketChannel channel ) throws IOException
 	{
+		this.root = root;
+
 		channel.configureBlocking( false );
 
-		this.is = new BufferedInputStream( new SocketChannelInputStream( channel, 0 ), 8192 );
-		this.os = new BufferedOutputStream( new SocketChannelOutputStream( channel, 0 ) );
+		this.oc = new ChannelOutput( channel, TIMEOUT );
+		this.ic = new ChannelInput( channel, TIMEOUT );
 	}
 
 	@Override
 	public void accept( SocketChannel channel ) throws IOException
 	{
-		final BufferedReader rd = new BufferedReader( new InputStreamReader( this.is, "ISO-8859-1" ) );
-
 		try {
-			final HttpMethod method = MethodFactory.getMethod( rd.readLine() );
+			final ChannelInputStream is = new ChannelInputStream( this.ic );
+			final BufferedReader rd = new BufferedReader( new InputStreamReader( is, "ISO-8859-1" ) );
+			final HttpMethod method = MethodFactory.getMethod( rd.readLine(), this.root );
 
 			String head = null;
 
@@ -47,11 +54,11 @@ implements Service
 				method.add( new HttpHeader( head ) );
 			}
 
-			method.forward( this.is, this.os );
+			method.forward( this.ic, this.oc );
 		}
 		finally {
-			IO.close( this.is );
-			IO.close( this.os );
+			IO.close( this.ic );
+			IO.close( this.oc );
 		}
 	}
 }

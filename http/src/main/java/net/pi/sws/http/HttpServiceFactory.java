@@ -1,6 +1,7 @@
 
 package net.pi.sws.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
@@ -11,10 +12,17 @@ public class HttpServiceFactory
 implements ServiceFactory
 {
 
+	private final File	root;
+
+	HttpServiceFactory( File root )
+	{
+		this.root = root;
+	}
+
 	@Override
 	public Service create( SocketChannel channel ) throws IOException
 	{
-		return new HttpService( channel );
+		return new HttpService( this.root, channel );
 	}
 
 }

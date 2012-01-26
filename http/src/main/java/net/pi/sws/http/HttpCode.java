@@ -10,9 +10,9 @@ import net.pi.sws.util.IO;
 public final class HttpCode
 {
 
-	static private final Class<HttpCode>	CLASS				= HttpCode.class;
+	static private final Class<HttpCode>	CLASS					= HttpCode.class;
 
-	static private final Properties			MESSAGES			= new Properties();
+	static private final Properties			MESSAGES				= new Properties();
 
 	static {
 		final InputStream is = CLASS.getResourceAsStream( CLASS.getSimpleName() + ".properties" );
@@ -32,11 +32,15 @@ public final class HttpCode
 		}
 	}
 
-	static public final HttpCode			S_OK				= new HttpCode( "200" );
+	static public final HttpCode			S_OK					= new HttpCode( "200" );
 
-	static public final HttpCode			S_BAD_REQUEST		= new HttpCode( "400" );
+	static public final HttpCode			S_BAD_REQUEST			= new HttpCode( "400" );
 
-	static public final HttpCode			S_INTERNAL_ERROR	= new HttpCode( "500" );
+	static public final HttpCode			S_NOT_FOUND				= new HttpCode( "404" );
+
+	static public final HttpCode			S_METHOD_NOT_ALLOWED	= new HttpCode( "405" );
+
+	static public final HttpCode			S_INTERNAL_ERROR		= new HttpCode( "500" );
 
 	final byte[]							code;
 

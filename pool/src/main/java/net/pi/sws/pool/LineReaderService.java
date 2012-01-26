@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
 
 import net.pi.sws.util.ExtLog;
 
-class LineService
+class LineReaderService
 implements Service
 {
 
@@ -20,7 +20,7 @@ implements Service
 
 	private final BufferedReader	rd;
 
-	public LineService( String encoding, SocketChannel channel ) throws IOException
+	public LineReaderService( String encoding, SocketChannel channel ) throws IOException
 	{
 		this.cs = Charset.forName( encoding );
 

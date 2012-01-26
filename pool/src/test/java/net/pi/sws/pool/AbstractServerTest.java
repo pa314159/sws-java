@@ -22,7 +22,7 @@ implements ServiceFactory
 
 	public Service create( SocketChannel channel ) throws IOException
 	{
-		final CompletionService serv = new CompletionService( new LineService( "UTF-8", channel ) );
+		final CompletionService serv = new CompletionService( new LineReaderService( "UTF-8", channel ) );
 
 		this.service.set( serv );
 

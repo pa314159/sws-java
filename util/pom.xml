@@ -9,14 +9,14 @@
 	</parent>
 
 	<groupId>net.pi.sws</groupId>
-	<artifactId>sws-pool</artifactId>
+	<artifactId>sws-util</artifactId>
 
 	<name>${project.artifactId}</name>
 
 	<dependencies>
 		<dependency>
-			<groupId>net.pi.sws</groupId>
-			<artifactId>sws-util</artifactId>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

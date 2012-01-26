@@ -1,12 +1,10 @@
 
-package net.pi.sws;
+package net.pi.sws.pool;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import net.pi.sws.pool.DefaultServiceFactory;
-import net.pi.sws.pool.ServerPool;
 
 public class Main
 {

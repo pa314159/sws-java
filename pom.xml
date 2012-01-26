@@ -13,7 +13,9 @@
 	<description>Simple Web Server</description>
 
 	<modules>
+		<module>http</module>
 		<module>pool</module>
+		<module>util</module>
 	</modules>
 
 	<build>
@@ -64,6 +66,22 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>net.pi.sws</groupId>
+				<artifactId>sws-http</artifactId>
+				<version>0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>net.pi.sws</groupId>
+				<artifactId>sws-pool</artifactId>
+				<version>0.1-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>net.pi.sws</groupId>
+				<artifactId>sws-util</artifactId>
+				<version>0.1-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>2.1</version>
@@ -73,16 +91,23 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.14</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.9</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
-			<scope>provided</scope>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.1.2</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

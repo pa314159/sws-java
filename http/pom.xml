@@ -9,20 +9,14 @@
 	</parent>
 
 	<groupId>net.pi.sws</groupId>
-	<artifactId>sws-pool</artifactId>
+	<artifactId>sws-http</artifactId>
 
 	<name>${project.artifactId}</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>net.pi.sws</groupId>
-			<artifactId>sws-util</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.1.2</version>
-			<scope>test</scope>
+			<artifactId>sws-pool</artifactId>
 		</dependency>
 	</dependencies>
 </project>

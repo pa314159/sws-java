@@ -106,7 +106,7 @@ implements LifeCycle
 
 		this.exec = (ThreadPoolExecutor) Executors.newFixedThreadPool( 20, tf );
 
-		this.exec.setRejectedExecutionHandler( new CloseExecutionHandler() );
+		this.exec.setRejectedExecutionHandler( new ThreadPoolExecutor.DiscardPolicy() );
 	}
 
 	public InetSocketAddress getAddress()

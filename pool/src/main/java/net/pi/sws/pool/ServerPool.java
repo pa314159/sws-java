@@ -10,7 +10,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -89,8 +89,6 @@ implements LifeCycle
 	public ServerPool( SocketAddress a, ServiceFactory fact ) throws IOException
 	{
 		this.sel = Selector.open();
-
-		//
 		this.chn = ServerSocketChannel.open();
 
 		this.chn.socket().setReuseAddress( true );
@@ -98,15 +96,13 @@ implements LifeCycle
 		this.chn.configureBlocking( false );
 		this.chn.register( this.sel, SelectionKey.OP_ACCEPT );
 
-		//
 		this.fact = fact;
 
-		//
 		final NamedThreadFactory tf = new NamedThreadFactory( "sws-%02d", false );
 
-		this.exec = (ThreadPoolExecutor) Executors.newFixedThreadPool( 20, tf );
-
-		this.exec.setRejectedExecutionHandler( new ThreadPoolExecutor.DiscardPolicy() );
+		// XXX review this
+		this.exec = new ThreadPoolExecutor( 20, 20, 0L, TimeUnit.MILLISECONDS,
+			new ArrayBlockingQueue<Runnable>( 20 ), tf, new ThreadPoolExecutor.DiscardPolicy() );
 	}
 
 	public InetSocketAddress getAddress()

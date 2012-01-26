@@ -1,5 +1,5 @@
 
-package net.pi.sws.echo;
+package net.pi.sws.http;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -7,7 +7,7 @@ import java.net.SocketAddress;
 import net.pi.sws.pool.ServerPool;
 import net.pi.sws.util.ExtLog;
 
-public class Echo
+public class Main
 {
 
 	static class ShutdownHook
@@ -55,22 +55,22 @@ public class Echo
 			break;
 
 			default:
-				System.err.println( "Usage: java -jar sws-pool.jar [host] port" );
+				System.err.println( "Usage: java -jar sws-http.jar [host] port" );
 				System.exit( 1 );
 
 				// probably unreachable :)
 				return;
 		}
 
-		new Echo( host, port ).go();
+		new Main( host, port ).go();
 	}
 
 	private final ServerPool	pool;
 
-	private Echo( String host, int port ) throws IOException
+	private Main( String host, int port ) throws IOException
 	{
 		final SocketAddress bind = new InetSocketAddress( host, port );
-		final EchoServiceFactory fact = new EchoServiceFactory();
+		final HttpServiceFactory fact = new HttpServiceFactory();
 
 		this.pool = new ServerPool( bind, fact );
 	}

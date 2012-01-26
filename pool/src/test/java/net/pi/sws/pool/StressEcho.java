@@ -11,9 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.pi.sws.util.IO;
 import net.pi.sws.util.NamedThreadFactory;
-
-import org.apache.commons.io.IOUtils;
 
 public class StressEcho
 extends AbstractServerTest
@@ -54,9 +53,9 @@ extends AbstractServerTest
 				e.printStackTrace();
 			}
 			finally {
-				IOUtils.closeQuietly( this.rd );
-				IOUtils.closeQuietly( this.wr );
-				IOUtils.closeQuietly( this.sock );
+				IO.close( this.rd );
+				IO.close( this.wr );
+				IO.close( this.sock );
 			}
 		}
 	}

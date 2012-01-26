@@ -16,9 +16,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.pi.sws.util.ExtLog;
+import net.pi.sws.util.IO;
 import net.pi.sws.util.NamedThreadFactory;
-
-import org.apache.commons.io.IOUtils;
 
 public class ServerPool
 implements LifeCycle
@@ -58,7 +57,7 @@ implements LifeCycle
 
 		void close()
 		{
-			IOUtils.closeQuietly( this.chn );
+			IO.close( this.chn );
 		}
 
 		void reject()

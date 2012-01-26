@@ -2,13 +2,9 @@
 package net.pi.sws.util;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.Socket;
-import java.nio.channels.FileChannel;
 import java.nio.channels.Selector;
-import java.nio.channels.WritableByteChannel;
 
 /**
  * Simple IO operations
@@ -53,34 +49,6 @@ public final class IO
 
 				timeout = end - now;
 			}
-		}
-	}
-
-	static public void sendFile( File file, WritableByteChannel channel, Selector sel ) throws IOException
-	{
-		final RandomAccessFile r = new RandomAccessFile( file, "r" );
-		final FileChannel fc = r.getChannel();
-
-		long position = 0;
-		long count = fc.size();
-
-		while( count > 0 ) {
-
-			if( sel != null ) {
-				sel.select();
-			}
-
-			final long transfered = fc.transferTo( position, fc.size(), channel );
-
-			if( transfered < 0 ) {
-				throw new IOException( "Cannot send file " + file );
-			}
-			if( transfered == 0 ) {
-				continue;
-			}
-
-			position += transfered;
-			count -= transfered;
 		}
 	}
 

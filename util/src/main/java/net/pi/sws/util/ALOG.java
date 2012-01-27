@@ -8,7 +8,7 @@ package net.pi.sws.util;
 
 
 /**
- * @author Pappy Răzvan STĂNESCU <a href="mailto:pappy&#64;ascelion.com">&lt;pappy&#64;ascelion.com&gt;</a>
+ * @author PAPPY <a href="mailto:pa314159#64;gmail.com">&lt;pa314159#64;gmail.com&gt;</a>
  */
 abstract class ALOG
 {

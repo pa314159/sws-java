@@ -6,6 +6,9 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
+/**
+ * Use it instead of {@link java.nio.channels.Channels#newOutputStream(WritableByteChannel)}...
+ */
 class ChannelOutputStream
 extends OutputStream
 {

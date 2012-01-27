@@ -4,11 +4,12 @@ package net.pi.sws.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * Use it instead of {@link Channels#newInputStream(ReadableByteChannel)}...
+ * Use it instead of {@link java.nio.channels.Channels#newInputStream(ReadableByteChannel)}...
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
 class ChannelInputStream
 extends InputStream

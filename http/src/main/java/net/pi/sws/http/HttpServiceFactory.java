@@ -8,6 +8,11 @@ import java.nio.channels.SocketChannel;
 import net.pi.sws.pool.Service;
 import net.pi.sws.pool.ServiceFactory;
 
+/**
+ * Factory of HTTP service.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public class HttpServiceFactory
 implements ServiceFactory
 {

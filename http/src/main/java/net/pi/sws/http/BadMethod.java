@@ -6,6 +6,11 @@ import java.io.IOException;
 
 import net.pi.sws.util.ExtLog;
 
+/**
+ * Default http implementation sending {@link HttpCode#S_METHOD_NOT_ALLOWED}.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 final class BadMethod
 extends HttpMethod
 {
@@ -20,16 +25,16 @@ extends HttpMethod
 	}
 
 	@Override
-	protected void execute() throws IOException
+	protected void respond() throws IOException
 	{
 		L.info( "BAD request" );
 
-		setStatus( HttpCode.S_BAD_REQUEST );
+		setStatus( HttpCode.S_METHOD_NOT_ALLOWED );
 
-		addHeader( new HttpHeader( "RequestLine", getURI() ) );
+		addResponseHeader( new HttpHeader( "RequestLine", getURI() ) );
 
 		for( final HttpHeader h : this.requestH.values() ) {
-			addHeader( h );
+			addResponseHeader( h );
 		}
 	}
 }

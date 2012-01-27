@@ -5,6 +5,8 @@ import java.io.IOException;
 
 /**
  * Simple header structure, holding the name and the content of the header
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
 public class HttpHeader
 {

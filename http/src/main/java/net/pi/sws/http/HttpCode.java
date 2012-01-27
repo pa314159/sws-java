@@ -7,6 +7,11 @@ import java.util.Properties;
 
 import net.pi.sws.util.IO;
 
+/**
+ * Some HTTP status codes.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public final class HttpCode
 {
 
@@ -42,13 +47,13 @@ public final class HttpCode
 
 	static public final HttpCode			S_INTERNAL_ERROR		= new HttpCode( "500" );
 
-	final byte[]							code;
+	final String							code;
 
-	final byte[]							text;
+	final String							text;
 
 	private HttpCode( String code )
 	{
-		this.code = code.getBytes( HttpMethod.ISO_8859_1 );
-		this.text = MESSAGES.getProperty( code, code ).getBytes( HttpMethod.ISO_8859_1 );
+		this.code = code;
+		this.text = MESSAGES.getProperty( code, code );
 	}
 }

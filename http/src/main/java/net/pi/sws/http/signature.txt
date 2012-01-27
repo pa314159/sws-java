@@ -1,0 +1,1 @@
+SWS/${project.version} ${project.name}

@@ -24,7 +24,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									 <mainClass>net.pi.sws.http.Main</mainClass>
+									<mainClass>net.pi.sws.http.Main</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
@@ -38,6 +38,10 @@
 		<dependency>
 			<groupId>net.pi.sws</groupId>
 			<artifactId>sws-pool</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.pi.sws</groupId>

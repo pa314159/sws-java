@@ -1,11 +1,15 @@
 
 package net.pi.sws.http;
 
-import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
@@ -14,19 +18,66 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Base of all HTTP methods.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public abstract class HttpMethod
 {
 
-	static final byte[]				CRLF		= { 0x0D, 0x0A };
+	static class ByteDataOutputStream
+	extends ByteArrayOutputStream
+	{
 
-	static final byte[]				COLON		= { 0x3A, 0x20 };
+		ByteDataOutputStream()
+		{
+			super( 8192 );
+		}
 
-	static final byte[]				SPACE		= { 0x20 };
+		void transferTo( WritableByteChannel chn ) throws IOException
+		{
+			chn.write( ByteBuffer.wrap( this.buf, 0, this.count ) );
+		}
+	}
 
-	static final Charset			ISO_8859_1;
+	enum IOType
+	{
+		STREAM( "Stream" ),
+		BUFFER( "StreamBuffered" ),
+		CHANNEL( "Channel" )
+
+		;
+
+		final String	suffix;
+
+		IOType( String suffix )
+		{
+			this.suffix = suffix;
+		}
+	}
+
+	static final Charset			ISO_8859_1	= Charset.forName( "ISO-8859-1" );
+
+	private static final String		SIGNATURE;
 
 	static {
-		ISO_8859_1 = Charset.forName( "ISO-8859-1" );
+		final InputStream is = HttpMethod.class.getResourceAsStream( "signature.txt" );
+
+		if( is == null ) {
+			throw new ExceptionInInitializerError( "Cannot find signature.txt" );
+		}
+
+		try {
+			final BufferedReader rd = new BufferedReader( new InputStreamReader( is, "UTF-8" ) );
+
+			SIGNATURE = rd.readLine();
+
+			rd.close();
+		}
+		catch( final IOException e ) {
+			throw (Error) new ExceptionInInitializerError( "Cannot read signature.txt" ).initCause( e );
+		}
 	}
 
 	final Map<String, HttpHeader>	requestH	= new HashMap<String, HttpHeader>();
@@ -37,13 +88,13 @@ public abstract class HttpMethod
 
 	private InputStream				is;
 
-	private boolean					gotI;
+	private IOType					iType;
 
 	private WritableByteChannel		oc;
 
 	private OutputStream			os;
 
-	private boolean					gotO;
+	private IOType					oType;
 
 	private final String			version;
 
@@ -69,29 +120,29 @@ public abstract class HttpMethod
 
 	private void flushHead() throws IOException
 	{
-		final BufferedOutputStream os = new BufferedOutputStream( new ChannelOutputStream( this.oc ) );
-
-		os.write( this.version.getBytes( ISO_8859_1 ) );
-		os.write( SPACE );
-		os.write( this.status.code );
-		os.write( SPACE );
-		os.write( this.status.text );
-		os.write( CRLF );
-
-		for( final HttpHeader h : this.responseH ) {
-			os.write( h.name.getBytes( ISO_8859_1 ) );
-			os.write( COLON );
-			os.write( h.content.getBytes( ISO_8859_1 ) );
-			os.write( CRLF );
+		if( this.flushed ) {
+			throw new IllegalStateException( "The header has been already flushed" );
 		}
 
-		os.write( CRLF );
-		os.flush();
+		final ByteDataOutputStream os = new ByteDataOutputStream();
+		final PrintStream ps = new PrintStream( os, true, ISO_8859_1.name() );
+
+		ps.printf( "%s %s %s\r\n", this.version, this.status.code, this.status.text );
+
+		for( final HttpHeader h : this.responseH ) {
+			ps.printf( "%s\r\n", h );
+		}
+
+		ps.printf( "\r\n" );
+
+		os.transferTo( this.oc );
+
+		// don't ps.close();
 
 		this.flushed = true;
 	}
 
-	protected final void addHeader( HttpHeader h ) throws IOException
+	protected final void addResponseHeader( HttpHeader h ) throws IOException
 	{
 		if( this.flushed ) {
 			throw new IllegalStateException( "Header has been already flushed" );
@@ -100,64 +151,81 @@ public abstract class HttpMethod
 		this.responseH.add( h );
 	}
 
-	protected abstract void execute() throws IOException;
-
-	final protected HttpHeader getHeader( String name )
-	{
-		return this.requestH.get( name );
-	}
-
 	protected ReadableByteChannel getInputChannel() throws IOException
 	{
-		if( this.is != null ) {
-			throw new IllegalStateException( "Already called getInputStream() " );
+		if( (this.iType == null) || (this.iType == IOType.CHANNEL) ) {
+			return this.ic;
 		}
 
-		this.gotI = true;
-
-		return this.ic;
+		throw new IllegalStateException( String.format( "Already called getInput%s()", this.oType.suffix ) );
 	}
 
 	protected InputStream getInputStream() throws IOException
 	{
-		if( this.gotI ) {
-			throw new IllegalStateException( "Already called getInputChannel() " );
-		}
+		if( this.iType == null ) {
+			this.iType = IOType.STREAM;
 
-		if( this.is != null ) {
+			return this.is = new ChannelInputStream( this.ic );
+		}
+		if( this.iType == IOType.STREAM ) {
 			return this.is;
 		}
 
-		return this.is = new ChannelInputStream( this.ic );
+		throw new IllegalStateException( String.format( "Already called getInput%s()", this.oType.suffix ) );
 	}
 
 	protected WritableByteChannel getOutputChannel() throws IOException
 	{
-		if( this.os != null ) {
-			throw new IllegalStateException( "Already called getOutputStream() " );
+		if( this.oType == null ) {
+			this.oType = IOType.CHANNEL;
+
+			flushHead();
+
+			return this.oc;
+		}
+		if( this.oType == IOType.CHANNEL ) {
+			return this.oc;
 		}
 
-		this.gotO = true;
-
-		flushHead();
-
-		return this.oc;
+		throw new IllegalStateException( String.format( "Already called getOutput%s()", this.oType.suffix ) );
 	}
 
 	protected OutputStream getOutputStream() throws IOException
 	{
-		if( this.gotO ) {
-			throw new IllegalStateException( "Already called getOutputChannel() " );
+		if( this.oType == null ) {
+			this.oType = IOType.STREAM;
+
+			flushHead();
+
+			return this.os = new ChannelOutputStream( this.oc );
 		}
-
-		flushHead();
-
-		if( this.os != null ) {
+		if( this.oType == IOType.STREAM ) {
 			return this.os;
 		}
 
-		return this.os = new ChannelOutputStream( this.oc );
+		throw new IllegalStateException( String.format( "Already called getOutput%s()", this.oType.suffix ) );
 	}
+
+	protected OutputStream getOutputStreamBuffered() throws IOException
+	{
+		if( this.oType == null ) {
+			this.oType = IOType.BUFFER;
+
+			return this.os = new ByteDataOutputStream();
+		}
+		if( this.oType == IOType.BUFFER ) {
+			return this.os;
+		}
+
+		throw new IllegalStateException( String.format( "Already called getOutput%s()", this.oType.suffix ) );
+	}
+
+	final protected HttpHeader getRequestHeader( String name )
+	{
+		return this.requestH.get( name );
+	}
+
+	protected abstract void respond() throws IOException;
 
 	protected final void setStatus( HttpCode code ) throws IOException
 	{
@@ -168,7 +236,7 @@ public abstract class HttpMethod
 		this.status = code;
 	}
 
-	final void add( HttpHeader h )
+	void add( HttpHeader h )
 	{
 		this.requestH.put( h.name, h );
 	}
@@ -179,12 +247,22 @@ public abstract class HttpMethod
 		this.oc = oc;
 
 		setStatus( HttpCode.S_OK );
-		addHeader( new HttpHeader( "Server", "SWS/0.1 Simple Web Server" ) );
+		addResponseHeader( new HttpHeader( "Server", SIGNATURE ) );
 
-		execute();
+		respond();
 
 		if( !this.flushed ) {
+			assert (this.oType == null) || (this.oType == IOType.BUFFER);
+
 			flushHead();
+		}
+
+		if( this.os != null ) {
+			this.os.flush();
+		}
+
+		if( this.oType == IOType.BUFFER ) {
+			((ByteDataOutputStream) this.os).transferTo( oc );
 		}
 	}
 }

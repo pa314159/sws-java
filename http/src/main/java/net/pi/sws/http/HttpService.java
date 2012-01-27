@@ -1,8 +1,6 @@
 
 package net.pi.sws.http;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +10,11 @@ import java.nio.channels.SocketChannel;
 import net.pi.sws.pool.Service;
 import net.pi.sws.util.IO;
 
+/**
+ * HTTP service implementation.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public class HttpService
 implements Service
 {

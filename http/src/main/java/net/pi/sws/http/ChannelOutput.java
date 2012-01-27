@@ -10,6 +10,11 @@ import java.nio.channels.WritableByteChannel;
 
 import net.pi.sws.util.IO;
 
+/**
+ * Non blocking writable channel handling timeouts.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 class ChannelOutput
 implements WritableByteChannel
 {

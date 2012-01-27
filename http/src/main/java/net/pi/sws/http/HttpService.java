@@ -7,8 +7,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.channels.SocketChannel;
 
+import net.pi.sws.io.ChannelInput;
+import net.pi.sws.io.ChannelInputStream;
+import net.pi.sws.io.ChannelOutput;
+import net.pi.sws.io.IO;
 import net.pi.sws.pool.Service;
-import net.pi.sws.util.IO;
 
 /**
  * HTTP service implementation.
@@ -42,7 +45,7 @@ implements Service
 	{
 		try {
 			final ChannelInputStream is = new ChannelInputStream( this.ic );
-			final BufferedReader rd = new BufferedReader( new InputStreamReader( is, "ISO-8859-1" ) );
+			final BufferedReader rd = new BufferedReader( new InputStreamReader( is, "ISO-8859-1" ), 1 );
 			final HttpMethod method = MethodFactory.getInstance().get( rd.readLine(), this.root );
 
 			String head = null;

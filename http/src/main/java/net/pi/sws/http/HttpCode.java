@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import net.pi.sws.util.IO;
+import net.pi.sws.io.IO;
 
 /**
  * Some HTTP status codes.

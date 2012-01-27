@@ -1,5 +1,5 @@
 
-package net.pi.sws.http;
+package net.pi.sws.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,13 +11,13 @@ import java.nio.channels.ReadableByteChannel;
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
-class ChannelInputStream
+public class ChannelInputStream
 extends InputStream
 {
 
 	private final ReadableByteChannel	channel;
 
-	ChannelInputStream( ReadableByteChannel channel ) throws IOException
+	public ChannelInputStream( ReadableByteChannel channel ) throws IOException
 	{
 		this.channel = channel;
 	}

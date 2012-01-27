@@ -1,5 +1,5 @@
 
-package net.pi.sws.http;
+package net.pi.sws.io;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,14 +8,13 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import net.pi.sws.util.IO;
 
 /**
  * Non blocking readable channel handling timeouts.
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
-class ChannelInput
+public class ChannelInput
 implements ReadableByteChannel
 {
 
@@ -25,7 +24,7 @@ implements ReadableByteChannel
 
 	private final Selector				sel;
 
-	ChannelInput( SocketChannel channel, int timeout ) throws IOException
+	public ChannelInput( SocketChannel channel, int timeout ) throws IOException
 	{
 		this.sel = Selector.open();
 

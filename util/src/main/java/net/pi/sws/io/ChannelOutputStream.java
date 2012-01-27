@@ -1,5 +1,5 @@
 
-package net.pi.sws.http;
+package net.pi.sws.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,13 +9,13 @@ import java.nio.channels.WritableByteChannel;
 /**
  * Use it instead of {@link java.nio.channels.Channels#newOutputStream(WritableByteChannel)}...
  */
-class ChannelOutputStream
+public class ChannelOutputStream
 extends OutputStream
 {
 
 	private final WritableByteChannel	channel;
 
-	ChannelOutputStream( WritableByteChannel channel ) throws IOException
+	public ChannelOutputStream( WritableByteChannel channel ) throws IOException
 	{
 		this.channel = channel;
 	}

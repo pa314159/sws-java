@@ -1,8 +1,6 @@
 
 package net.pi.sws.http;
 
-import java.io.IOException;
-
 /**
  * Simple header structure, holding the name and the content of the header
  * 
@@ -10,6 +8,12 @@ import java.io.IOException;
  */
 public class HttpHeader
 {
+
+	interface Request
+	{
+
+		String	EXPECT	= "Expect";
+	}
 
 	final String	name;
 
@@ -19,7 +23,7 @@ public class HttpHeader
 
 	private String	text;
 
-	public HttpHeader( String name, String content ) throws IOException
+	public HttpHeader( String name, String content )
 	{
 		this.name = name;
 		this.content = content;
@@ -27,12 +31,12 @@ public class HttpHeader
 		init();
 	}
 
-	HttpHeader( String line ) throws IOException
+	HttpHeader( String line )
 	{
 		final int colon = line.indexOf( ':' );
 
 		if( colon <= 0 ) {
-			throw new IOException( "Error parsing line " + line );
+			throw new IllegalArgumentException( "Error parsing line " + line );
 		}
 
 		this.name = line.substring( 0, colon ).trim();
@@ -69,10 +73,10 @@ public class HttpHeader
 		return this.text.toString();
 	}
 
-	private void init() throws IOException
+	private void init()
 	{
 		if( this.name.isEmpty() ) {
-			throw new IOException( "Header name cannot be empty" );
+			throw new IllegalArgumentException( "Header name cannot be empty" );
 		}
 
 		this.hash = 31 + this.name.toUpperCase().hashCode();

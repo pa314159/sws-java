@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.pi.sws.io.ChannelInputStream;
+import net.pi.sws.io.ChannelOutputStream;
+
 /**
  * Base of all HTTP methods.
  * 
@@ -220,7 +223,7 @@ public abstract class HttpMethod
 		throw new IllegalStateException( String.format( "Already called getOutput%s()", this.oType.suffix ) );
 	}
 
-	final protected HttpHeader getRequestHeader( String name )
+	protected final HttpHeader getRequestHeader( String name )
 	{
 		return this.requestH.get( name );
 	}
@@ -246,7 +249,16 @@ public abstract class HttpMethod
 		this.ic = ic;
 		this.oc = oc;
 
-		setStatus( HttpCode.S_OK );
+		final HttpHeader h = getRequestHeader( HttpHeader.Request.EXPECT );
+
+		if( (h != null) && "100-continue".equals( h.content ) ) {
+
+		}
+		else
+		{
+			setStatus( HttpCode.S_OK );
+		}
+
 		addResponseHeader( new HttpHeader( "Server", SIGNATURE ) );
 
 		respond();

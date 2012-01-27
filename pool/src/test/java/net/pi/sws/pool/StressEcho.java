@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import net.pi.sws.util.IO;
+import net.pi.sws.io.IO;
 import net.pi.sws.util.NamedThreadFactory;
 
 public class StressEcho

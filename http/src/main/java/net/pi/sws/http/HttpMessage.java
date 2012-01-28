@@ -27,11 +27,6 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		this.channel = channel;
 	}
 
-	public void addHeader( HttpHeader h )
-	{
-		this.headers.put( h.name.toLowerCase(), h );
-	}
-
 	public S getByteStream() throws IOException
 	{
 		if( this.ioType == null ) {
@@ -98,6 +93,11 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		else {
 			return true;
 		}
+	}
+
+	public void setHeader( HttpHeader h )
+	{
+		this.headers.put( h.name.toLowerCase(), h );
 	}
 
 	abstract S newByteStream( C channel ) throws IOException;

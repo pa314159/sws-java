@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 
+import junit.framework.Assert;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -40,6 +42,24 @@ extends AbstractHttpTest
 	}
 
 	@Test( /* timeout = 30000 */)
+	public void getRoot() throws ClientProtocolException, IOException
+	{
+		final HttpClient client = new DefaultHttpClient();
+		final InetSocketAddress sock = (InetSocketAddress) this.pool.getAddress();
+		final HttpHost host = new HttpHost( sock.getHostName(), sock.getPort() );
+		final HttpGet request = new HttpGet( "/" );
+
+		for( int k = 0; k < 5; k++ ) {
+			dump( client.execute( host, request ) );
+		}
+
+		request.addHeader( HttpHeader.General.CONNECTION, "close" );
+		dump( client.execute( host, request ) );
+
+		client.getConnectionManager().shutdown();
+	}
+
+	@Test( /* timeout = 30000 */)
 	public void head() throws ClientProtocolException, IOException
 	{
 		final HttpClient client = new DefaultHttpClient();
@@ -54,6 +74,25 @@ extends AbstractHttpTest
 		}
 		request.addHeader( HttpHeader.General.CONNECTION, "close" );
 		dump( client.execute( host, request ) );
+
+		client.getConnectionManager().shutdown();
+	}
+
+	@Test( /* timeout = 30000 */)
+	public void outside() throws ClientProtocolException, IOException
+	{
+		final HttpClient client = new DefaultHttpClient();
+		final InetSocketAddress sock = (InetSocketAddress) this.pool.getAddress();
+		final HttpHost host = new HttpHost( sock.getHostName(), sock.getPort() );
+		final HttpGet request = new HttpGet( "/src/../.." );
+
+		request.addHeader( HttpHeader.General.CONNECTION, "close" );
+
+		final HttpResponse response = client.execute( host, request );
+
+		dump( response );
+
+		Assert.assertEquals( 404, response.getStatusLine().getStatusCode() );
 
 		client.getConnectionManager().shutdown();
 	}

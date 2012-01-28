@@ -1,7 +1,6 @@
 
 package net.pi.sws.http;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -45,31 +44,25 @@ implements ClassPathScanner.Visitor
 	{
 	}
 
-	public HttpMethod get( String head, File root ) throws IOException
+	public HttpMethod get( String met, HttpRequest request, HttpResponse response ) throws IOException
 	{
-		final String[] parts = head.split( "\\s+" );
-
-		if( parts.length != 3 ) {
-			throw new IOException( "Protocol error: " + head );
-		}
-
-		final Constructor<? extends HttpMethod> ct = INSTANCE.methods.get( parts[0] );
+		final Constructor<? extends HttpMethod> ct = INSTANCE.methods.get( met );
 
 		if( ct == null ) {
-			return new BadMethod( root, head );
+			return new BadMethod( request, response, HttpCode.NOT_IMPLEMENTED );
 		}
 
 		try {
-			return ct.newInstance( root, parts[1], parts[2] );
+			return ct.newInstance( request, response );
 		}
 		catch( final InstantiationException e ) {
-			return new BadMethod( root, head );
+			return new BadMethod( request, response, HttpCode.INTERNAL_ERROR );
 		}
 		catch( final IllegalAccessException e ) {
-			return new BadMethod( root, head );
+			return new BadMethod( request, response, HttpCode.INTERNAL_ERROR );
 		}
 		catch( final InvocationTargetException e ) {
-			return new BadMethod( root, head );
+			return new BadMethod( request, response, HttpCode.INTERNAL_ERROR );
 		}
 	}
 
@@ -90,9 +83,12 @@ implements ClassPathScanner.Visitor
 				throw new IOException( String.format( "Invalid @HTTP value for %s", clsName ) );
 			}
 
-			final Constructor<? extends HttpMethod> ct = cls.getConstructor( File.class, String.class, String.class );
+			final Constructor<? extends HttpMethod> ct = cls.getDeclaredConstructor( HttpRequest.class,
+				HttpResponse.class );
 
-			L.info( "Method %s implemented by %s", met, clsName );
+			ct.setAccessible( true );
+
+			L.info( "%s is %s", met, clsName );
 
 			this.methods.put( met, ct );
 		}
@@ -104,27 +100,6 @@ implements ClassPathScanner.Visitor
 		}
 	}
 
-	//	private void load( ClassLoader cld, URL u ) throws IOException
-	//	{
-	//		try {
-	//			final BufferedReader r = new BufferedReader( new InputStreamReader( u.openStream() ) );
-	//
-	//			try {
-	//				String cls = null;
-	//
-	//				while( (cls = r.readLine()) != null ) {
-	//					add( cld, cls );
-	//				}
-	//			}
-	//			finally {
-	//				IO.close( r );
-	//			}
-	//		}
-	//		catch( final IOException e ) {
-	//			throw new IOException( String.format( "Cannot read %s", u ), e );
-	//		}
-	//	}
-
 	private void scan() throws IOException
 	{
 		final ClassPathScanner cps = new ClassPathScanner( this );
@@ -132,12 +107,6 @@ implements ClassPathScanner.Visitor
 		cps.addPackage( "net.pi.sws." );
 		cps.addAnnotation( HTTP.class );
 		cps.scan();
-		//		final ClassLoader cld = Thread.currentThread().getContextClassLoader();
-		//		final Enumeration<URL> e = cld.getResources( "META-INF/services/" + HttpService.class.getName() );
-		//
-		//		while( e.hasMoreElements() ) {
-		//			load( cld, e.nextElement() );
-		//		}
 	}
 
 }

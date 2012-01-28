@@ -7,6 +7,8 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 
 import net.pi.sws.http.HTTP;
+import net.pi.sws.http.HttpRequest;
+import net.pi.sws.http.HttpResponse;
 
 /**
  * Implementation of GET.
@@ -18,19 +20,21 @@ public class GetMethod
 extends HeadMethod
 {
 
-	public GetMethod( File root, String uri, String version ) throws IOException
+	GetMethod( HttpRequest request, HttpResponse response ) throws IOException
 	{
-		super( root, uri, version );
+		super( request, response );
 	}
 
 	@Override
 	protected void send( File file ) throws IOException
 	{
+		super.send( file );
+
 		if( file.isFile() ) {
 			final RandomAccessFile r = new RandomAccessFile( file, "r" );
 			final FileChannel fc = r.getChannel();
 
-			fc.transferTo( 0, r.length(), getOutputChannel() );
+			fc.transferTo( 0, r.length(), getResponse().getChannel() );
 
 			r.close();
 		}

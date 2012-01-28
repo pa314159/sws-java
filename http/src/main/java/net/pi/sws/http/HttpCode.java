@@ -4,7 +4,6 @@ package net.pi.sws.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
 import net.pi.sws.io.IO;
 
 /**
@@ -12,22 +11,42 @@ import net.pi.sws.io.IO;
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
-public final class HttpCode
+public class HttpCode
 {
 
-	static private final Class<HttpCode>	CLASS					= HttpCode.class;
+	static public final HttpCode	CONTINUE				= new HttpCode( 100 );
 
-	static private final Properties			MESSAGES				= new Properties();
+	static public final HttpCode	OK						= new HttpCode( 200 );
 
-	static {
-		final InputStream is = CLASS.getResourceAsStream( CLASS.getSimpleName() + ".properties" );
+	static public final HttpCode	BAD_REQUEST				= new HttpCode( 400 );
+
+	static public final HttpCode	NOT_FOUND				= new HttpCode( 404 );
+
+	static public final HttpCode	METHOD_NOT_ALLOWED		= new HttpCode( 405 );
+
+	static public final HttpCode	INTERNAL_ERROR			= new HttpCode( 500 );
+
+	static public final HttpCode	NOT_IMPLEMENTED			= new HttpCode( 501 );
+
+	static public final HttpCode	VERSION_NOT_SUPPORTED	= new HttpCode( 505 );
+
+	static private final Properties	BUNDLE					= loadBundle();
+
+	static private Properties loadBundle()
+	{
+		final Class<HttpCode> cls = HttpCode.class;
+		final InputStream is = cls.getResourceAsStream( cls.getSimpleName() + ".properties" );
 
 		if( is == null ) {
 			throw new ExceptionInInitializerError();
 		}
 
 		try {
-			MESSAGES.load( is );
+			final Properties bundle = new Properties();
+
+			bundle.load( is );
+
+			return bundle;
 		}
 		catch( final IOException e ) {
 			throw new ExceptionInInitializerError( e );
@@ -37,23 +56,24 @@ public final class HttpCode
 		}
 	}
 
-	static public final HttpCode			S_OK					= new HttpCode( "200" );
+	private final int		code;
 
-	static public final HttpCode			S_BAD_REQUEST			= new HttpCode( "400" );
+	private final String	text;
 
-	static public final HttpCode			S_NOT_FOUND				= new HttpCode( "404" );
-
-	static public final HttpCode			S_METHOD_NOT_ALLOWED	= new HttpCode( "405" );
-
-	static public final HttpCode			S_INTERNAL_ERROR		= new HttpCode( "500" );
-
-	final String							code;
-
-	final String							text;
-
-	private HttpCode( String code )
+	public HttpCode( int code, String text )
 	{
 		this.code = code;
-		this.text = MESSAGES.getProperty( code, code );
+		this.text = BUNDLE.getProperty( text, text );
+	}
+
+	private HttpCode( int code )
+	{
+		this( code, Integer.toString( code ) );
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format( "%03d %s", this.code, this.text );
 	}
 }

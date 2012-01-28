@@ -8,6 +8,8 @@ import net.pi.sws.http.HTTP;
 import net.pi.sws.http.HttpCode;
 import net.pi.sws.http.HttpHeader;
 import net.pi.sws.http.HttpMethod;
+import net.pi.sws.http.HttpRequest;
+import net.pi.sws.http.HttpResponse;
 
 /**
  * Implementation of HEAD
@@ -19,32 +21,32 @@ public class HeadMethod
 extends HttpMethod
 {
 
-	public HeadMethod( File root, String uri, String version ) throws IOException
+	HeadMethod( HttpRequest request, HttpResponse response ) throws IOException
 	{
-		super( root, uri, version );
-	}
-
-	protected void send( File file ) throws IOException
-	{
-		if( file.isDirectory() ) {
-			addResponseHeader( new HttpHeader( "Content-Type", "text/html; charset=UTF-8" ) );
-		}
-		else {
-			addResponseHeader( new HttpHeader( "Content-Type", "application/octet-stream" ) );
-			addResponseHeader( new HttpHeader( "Content-Length", Long.toString( file.length() ) ) );
-		}
+		super( request, response );
 	}
 
 	@Override
 	protected final void respond() throws IOException
 	{
-		final File file = new File( this.root, getURI() );
+		final File file = new File( getResponse().getRoot(), getRequest().getURI() );
 
 		if( !file.exists() ) {
-			setStatus( HttpCode.S_NOT_FOUND );
+			getResponse().setStatus( HttpCode.NOT_FOUND );
 		}
 		else {
 			send( file );
+		}
+	}
+
+	protected void send( File file ) throws IOException
+	{
+		if( file.isDirectory() ) {
+			getResponse().addHeader( new HttpHeader( "Content-Type", "text/html; charset=UTF-8" ) );
+		}
+		else {
+			getResponse().addHeader( new HttpHeader( "Content-Type", "application/octet-stream" ) );
+			getResponse().addHeader( new HttpHeader( "Content-Length", Long.toString( file.length() ) ) );
 		}
 	}
 

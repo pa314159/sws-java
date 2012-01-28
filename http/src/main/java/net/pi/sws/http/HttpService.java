@@ -1,17 +1,15 @@
 
 package net.pi.sws.http;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.channels.SocketChannel;
 
 import net.pi.sws.io.ChannelInput;
-import net.pi.sws.io.ChannelInputStream;
 import net.pi.sws.io.ChannelOutput;
 import net.pi.sws.io.IO;
 import net.pi.sws.pool.Service;
+import net.pi.sws.util.ExtLog;
 
 /**
  * HTTP service implementation.
@@ -22,6 +20,29 @@ public class HttpService
 implements Service
 {
 
+	enum State
+	{
+		REQUEST,
+		HEADER,
+		RESPONSE,
+		ABORT,
+		CLOSE
+	}
+
+	static class StateContext
+	{
+
+		State		state	= State.REQUEST;
+
+		HttpRFC		rfc		= HttpRFC.RFC_1945;
+
+		HttpMethod	method;
+
+		boolean		keepAlive;
+	}
+
+	private static final ExtLog	L		= ExtLog.get();
+
 	private static final int	TIMEOUT	= 0;
 
 	private final File			root;
@@ -29,6 +50,8 @@ implements Service
 	private final ChannelOutput	oc;
 
 	private final ChannelInput	ic;
+
+	private StateContext		context	= new StateContext();
 
 	HttpService( File root, SocketChannel channel ) throws IOException
 	{
@@ -44,27 +67,128 @@ implements Service
 	public void accept( SocketChannel channel ) throws IOException
 	{
 		try {
-			final ChannelInputStream is = new ChannelInputStream( this.ic );
-			final BufferedReader rd = new BufferedReader( new InputStreamReader( is, "ISO-8859-1" ), 1 );
-			final HttpMethod method = MethodFactory.getInstance().get( rd.readLine(), this.root );
-
-			String head = null;
-
-			while( (head = rd.readLine()) != null ) {
-				head = head.trim();
-
-				if( head.isEmpty() ) {
-					break;
-				}
-
-				method.add( new HttpHeader( head ) );
+			while( this.context.state != State.CLOSE ) {
+				process();
 			}
-
-			method.forward( this.ic, this.oc );
 		}
 		finally {
 			IO.close( this.ic );
 			IO.close( this.oc );
+		}
+	}
+
+	private void doHeader() throws IOException
+	{
+		final String line = IO.readLINE( this.ic );
+
+		L.trace( "%s: %s", this.context.state, line );
+
+		if( line.isEmpty() ) {
+			this.context.state = State.RESPONSE;
+
+			return;
+		}
+
+		assert this.context.method != null;
+
+		final HttpHeader h = HttpHeader.parse( line );
+		final HttpRequest request = this.context.method.getRequest();
+
+		// intercept Keep-Alive
+		// TODO RFC2068 says something about HTTP/1.0 persistent connections, but RFC1945 doesn't mention them
+		if( this.context.rfc != HttpRFC.RFC_1945 ) {
+			if( h.is( HttpHeader.Request.EXPECT, "100-continue" ) ) {
+				this.context.keepAlive = true;
+
+				return;
+			}
+			if( h.is( HttpHeader.General.CONNECTION, "Keep-Alive" ) ) {
+				this.context.rfc = HttpRFC.RFC_2068;
+
+				this.context.keepAlive = true;
+
+				return;
+			}
+		}
+
+		request.addHeader( h );
+	}
+
+	private void doInvoke() throws IOException
+	{
+		this.context.method.respond();
+		this.context.method.flush();
+
+		if( this.context.keepAlive ) {
+			this.context = new StateContext();
+		}
+		else {
+			this.context.state = State.CLOSE;
+		}
+	}
+
+	private void doRequest() throws IOException
+	{
+		final String line = IO.readLINE( this.ic );
+
+		L.trace( "%s: %s", this.context.state, line );
+
+		final String[] parts = line.split( "\\s+" );
+
+		HttpVersion version = HttpVersion.HTTP1_0;
+		String uri = "";
+		String method = null;
+
+		switch( parts.length ) {
+			case 3:
+				version = HttpVersion.get( parts[2] );
+
+				if( version == null ) {
+					break;
+				}
+
+				this.context.rfc = version.rfc;
+
+			case 2:
+				method = parts[0];
+				uri = parts[1];
+			break;
+		}
+
+		final HttpRequest request = new HttpRequest( this.ic, uri );
+		final HttpResponse response = new HttpResponse( this.oc, this.root );
+
+		if( method == null ) {
+			if( version == null ) {
+				this.context.method = new BadMethod( request, response, HttpCode.VERSION_NOT_SUPPORTED );
+			}
+			else {
+				this.context.method = new BadMethod( request, response, HttpCode.BAD_REQUEST );
+			}
+		}
+		else {
+			this.context.method = MethodFactory.getInstance().get( method, request, response );
+		}
+
+		this.context.state = State.HEADER;
+	}
+
+	private void process() throws IOException
+	{
+		switch( this.context.state ) {
+			case REQUEST:
+				doRequest();
+			break;
+
+			case HEADER:
+				doHeader();
+			break;
+
+			case RESPONSE:
+				doInvoke();
+			break;
+
+			case CLOSE:
 		}
 	}
 }

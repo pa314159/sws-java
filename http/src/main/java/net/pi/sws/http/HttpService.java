@@ -145,6 +145,12 @@ implements Service
 	{
 		final String line = IO.readLINE( this.ic );
 
+		if( line == null ) {
+			this.context.state = State.CLOSE;
+
+			return;
+		}
+
 		L.trace( "%s: %s", this.context.state, line );
 
 		final String[] parts = line.split( "\\s+" );

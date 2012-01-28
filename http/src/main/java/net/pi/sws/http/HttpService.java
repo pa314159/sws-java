@@ -25,7 +25,6 @@ implements Service
 		REQUEST,
 		HEADER,
 		RESPONSE,
-		ABORT,
 		CLOSE
 	}
 
@@ -92,7 +91,17 @@ implements Service
 		assert this.context.method != null;
 
 		final HttpHeader h = HttpHeader.parse( line );
-		final HttpRequest request = this.context.method.getRequest();
+		final HttpRequest request = this.context.method.request;
+
+		// intercept compression
+		if( h.is( HttpHeader.Request.ACCEPT_ENCODING, null ) ) {
+			// TODO implement header parsing completely
+			if( h.content.contains( "gzip" ) ) {
+				this.context.method.response.gzip = true;
+
+				return; // filter it
+			}
+		}
 
 		// intercept Keep-Alive
 		// TODO RFC2068 says something about HTTP/1.0 persistent connections, but RFC1945 doesn't mention them
@@ -100,23 +109,28 @@ implements Service
 			if( h.is( HttpHeader.Request.EXPECT, "100-continue" ) ) {
 				this.context.keepAlive = true;
 
-				return;
+				return; // filter it
 			}
 			if( h.is( HttpHeader.General.CONNECTION, "Keep-Alive" ) ) {
 				this.context.rfc = HttpRFC.RFC_2068;
 
 				this.context.keepAlive = true;
 
-				return;
+				return; // filter it
 			}
 		}
 
-		request.addHeader( h );
+		request.setHeader( h );
 	}
 
 	private void doInvoke() throws IOException
 	{
+		L.trace( "%s: respond", this.context.state );
+
 		this.context.method.respond();
+
+		L.trace( "%s: flush", this.context.state );
+
 		this.context.method.flush();
 
 		if( this.context.keepAlive ) {

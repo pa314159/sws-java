@@ -1,0 +1,23 @@
+<html>
+<head>
+<title>$URI</title>
+</head>
+<body style="font-family: monospace;">
+
+
+#if( $files.size() > 0 || $folders.size() > 0 )
+<table>
+#if( $DOTDOT )
+<tr><td><img src="/folder.gif"/></td><td style="min-width: 200px"><a href="$DOTDOT">..</a>/</a></td><td></td></tr>
+#end
+#foreach( $file in $folders )
+<tr><td><img src="/folder.gif"/></td><td><a href="$file.path">$file.name/</a></td><td></td></tr>
+#end
+#foreach( $file in $files )
+<tr><td><img src="/file.gif"/></td><td><a href="$file.path">$file.name</a></td><td>$file.size</td></tr>
+#end
+</table>
+#end
+
+</body>
+</html>

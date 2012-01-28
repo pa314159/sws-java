@@ -16,6 +16,8 @@ import java.nio.charset.Charset;
 
 import javax.mail.internet.MimeUtility;
 
+import net.pi.sws.http.HttpHeader.General;
+import net.pi.sws.io.BufferedChannelOutput;
 import net.pi.sws.io.ChannelOutputStream;
 import net.pi.sws.io.IO;
 import net.pi.sws.util.ExtLog;
@@ -51,33 +53,29 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	private final WritableByteChannel	channel;
 
-	private Flushable					flushable;
-
-	private boolean						flushed;
+	private boolean						headFlushed;
 
 	private HttpCode					status;
 
 	private final File					root;
 
-	HttpResponse( WritableByteChannel channel, File root )
+	boolean								gzip;
+
+	private boolean						output;
+
+	private Flushable					flushable;
+
+	private BufferedChannelOutput		buffered;
+
+	HttpResponse( WritableByteChannel channel, File root ) throws IOException
 	{
 		super( channel );
 
 		this.channel = channel;
-		this.root = root;
+		this.root = root.getCanonicalFile();
 
 		setStatus( HttpCode.OK );
-		addHeader( SIGNATURE );
-	}
-
-	@Override
-	public void addHeader( HttpHeader h )
-	{
-		if( this.flushed ) {
-			throw new IllegalStateException( "The headers have been already flushed" );
-		}
-
-		super.addHeader( h );
+		setHeader( SIGNATURE );
 	}
 
 	public File getRoot()
@@ -85,66 +83,48 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 		return this.root;
 	}
 
+	@Override
+	public void setHeader( HttpHeader h )
+	{
+		if( this.headFlushed ) {
+			throw new IllegalStateException( "The headers have been already headFlushed" );
+		}
+
+		super.setHeader( h );
+	}
+
 	public void setStatus( HttpCode code )
 	{
-		if( this.flushed ) {
-			throw new IllegalStateException( "The headers have been already flushed" );
+		if( this.headFlushed ) {
+			throw new IllegalStateException( "The headers have been already headFlushed" );
 		}
 
 		this.status = code;
 	}
 
-	private void eol() throws IOException
-	{
-		this.channel.write( ByteBuffer.wrap( CRLF ) );
-	}
-
-	private void flushHead() throws IOException
-	{
-		if( this.flushed ) {
-			throw new IllegalStateException( "The headers have been already flushed" );
-		}
-
-		write( this.status );
-
-		for( final HttpHeader h : getHeaders() ) {
-			write( h );
-		}
-
-		eol();
-
-		this.flushed = true;
-	}
-
-	private void write( HttpCode status ) throws IOException
-	{
-		final String s = String.format( "%s %s", HttpVersion.HTTP1_1, status );
-
-		L.trace( "RESPONSE: %s", s );
-
-		this.channel.write( ByteBuffer.wrap( s.getBytes( IO.ISO_8859_1 ) ) );
-
-		eol();
-	}
-
-	private void write( HttpHeader h ) throws IOException
-	{
-		final String s = String.format( "%s: %s", h.name, MimeUtility.encodeText( h.content ) );
-
-		L.trace( "RESPONSE: %s", s );
-
-		this.channel.write( ByteBuffer.wrap( s.getBytes( IO.ISO_8859_1 ) ) );
-
-		eol();
-	}
-
 	void flush() throws IOException
 	{
-		if( !this.flushed ) {
-			flushHead();
+		if( this.output ) {
+			assert (this.buffered != null) == !this.headFlushed;
+
+			if( this.flushable != null ) {
+				this.flushable.flush();
+			}
+
+			if( this.buffered != null ) {
+				setHeader( new HttpHeader( General.CONTENT_LENGTH, this.buffered.size() ) );
+
+				flushHead();
+
+				this.buffered.flush();
+			}
 		}
-		if( this.flushable != null ) {
-			this.flushable.flush();
+		else {
+			assert !this.headFlushed;
+
+			setHeader( new HttpHeader( General.CONTENT_LENGTH, 0 ) );
+
+			flushHead();
 		}
 	}
 
@@ -171,14 +151,61 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 	@Override
 	WritableByteChannel wrap( WritableByteChannel channel ) throws IOException
 	{
-		flushHead();
+		this.output = true;
 
 		channel = super.wrap( channel );
 
-		if( channel instanceof Flushable ) {
-			this.flushable = (Flushable) channel;
+		if( !this.gzip && isHeaderPresent( General.CONTENT_LENGTH, null ) ) {
+			flushHead();
+		}
+		else {
+			return this.buffered = new BufferedChannelOutput( channel, this.gzip );
 		}
 
 		return channel;
+	}
+
+	private void eol() throws IOException
+	{
+		this.channel.write( ByteBuffer.wrap( CRLF ) );
+	}
+
+	private void flushHead() throws IOException
+	{
+		if( this.headFlushed ) {
+			throw new IllegalStateException( "The headers have been already headFlushed" );
+		}
+
+		write( this.status );
+
+		for( final HttpHeader h : getHeaders() ) {
+			write( h );
+		}
+
+		eol();
+
+		this.headFlushed = true;
+	}
+
+	private void write( HttpCode status ) throws IOException
+	{
+		final String s = String.format( "%s %s", HttpVersion.HTTP1_1, status );
+
+		L.trace( "RESPONSE: %s", s );
+
+		this.channel.write( ByteBuffer.wrap( s.getBytes( IO.ISO_8859_1 ) ) );
+
+		eol();
+	}
+
+	private void write( HttpHeader h ) throws IOException
+	{
+		final String s = String.format( "%s: %s", h.name, MimeUtility.encodeText( h.content ) );
+
+		L.trace( "RESPONSE: %s", s );
+
+		this.channel.write( ByteBuffer.wrap( s.getBytes( IO.ISO_8859_1 ) ) );
+
+		eol();
 	}
 }

@@ -4,6 +4,7 @@ package net.pi.sws.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
 import net.pi.sws.io.IO;
 
 /**
@@ -13,6 +14,8 @@ import net.pi.sws.io.IO;
  */
 public class HttpCode
 {
+
+	static private final Properties	BUNDLE					= loadBundle();
 
 	static public final HttpCode	CONTINUE				= new HttpCode( 100 );
 
@@ -29,8 +32,6 @@ public class HttpCode
 	static public final HttpCode	NOT_IMPLEMENTED			= new HttpCode( 501 );
 
 	static public final HttpCode	VERSION_NOT_SUPPORTED	= new HttpCode( 505 );
-
-	static private final Properties	BUNDLE					= loadBundle();
 
 	static private Properties loadBundle()
 	{

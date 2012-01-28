@@ -74,7 +74,7 @@ public final class IO
 			final int read = ic.read( ByteBuffer.wrap( data, ofs, 1 ) );
 
 			if( read < 0 ) {
-				throw new EOFException( "expecting more data" );
+				return null;
 			}
 			if( read == 0 ) {
 				break;

@@ -45,6 +45,8 @@ implements ServiceFactory
 	@After
 	public void tearDown() throws InterruptedException, IOException
 	{
-		this.pool.stop( 500 );
+		if( this.pool != null ) {
+			this.pool.stop( 500 );
+		}
 	}
 }

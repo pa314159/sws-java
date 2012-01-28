@@ -3,11 +3,15 @@ package net.pi.sws.io;
 
 import java.io.Closeable;
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.Selector;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 
 /**
@@ -17,6 +21,8 @@ public final class IO
 {
 
 	static public final Charset	ISO_8859_1	= Charset.forName( "ISO-8859-1" );
+
+	static public final Charset	UTF8		= Charset.forName( "UTF-8" );
 
 	static public void close( Closeable closeable )
 	{
@@ -36,6 +42,23 @@ public final class IO
 		catch( final IOException e ) {
 			;
 		}
+	}
+
+	public static void copy( InputStream is, OutputStream os ) throws IOException
+	{
+		final byte[] data = new byte[8192];
+		int read = 0;
+
+		while( (read = is.read( data )) > 0 ) {
+			os.write( data, 0, read );
+		}
+	}
+
+	public static String pathOf( File root, File file )
+	{
+		final String path = file.getPath().substring( root.getPath().length() );
+
+		return path.isEmpty() ? "/" : path;
 	}
 
 	static public String readLINE( ReadableByteChannel ic ) throws IOException
@@ -103,6 +126,27 @@ public final class IO
 				timeout = end - now;
 			}
 		}
+	}
+
+	static public int writeAll( WritableByteChannel out, byte[] data, int offset, int size ) throws IOException
+	{
+		final ByteBuffer bb = ByteBuffer.wrap( data, offset, size );
+
+		while( size > 0 ) {
+			final int transferred = out.write( bb );
+
+			if( transferred == 0 ) {
+				continue;
+			}
+			if( transferred < 0 ) {
+				throw new EOFException();
+			}
+
+			size -= transferred;
+			offset += transferred;
+		}
+
+		return size;
 	}
 
 	private IO()

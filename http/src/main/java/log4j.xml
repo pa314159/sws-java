@@ -15,6 +15,10 @@
 	<category name="net.pi.sws">
 		<level value="INFO"/>
 	</category>
+
+	<category name="net.pi.sws.http">
+		<level value="ALL"/>
+	</category>
 	
 	<root>
 		<level value="INFO"/>

@@ -4,19 +4,19 @@ package net.pi.sws.io;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.Selector;
-
-import javax.mail.internet.MimeUtility;
+import java.nio.charset.Charset;
 
 /**
  * Simple IO operations
  */
 public final class IO
 {
+
+	static public final Charset	ISO_8859_1	= Charset.forName( "ISO-8859-1" );
 
 	static public void close( Closeable closeable )
 	{
@@ -54,7 +54,7 @@ public final class IO
 				throw new EOFException( "expecting more data" );
 			}
 			if( read == 0 ) {
-				continue;
+				break;
 			}
 
 			if( data[ofs] == '\n' ) {
@@ -82,14 +82,7 @@ public final class IO
 			ofs--;
 		}
 
-		final String line = new String( data, 0, ofs, "ISO-8859-1" );
-
-		try {
-			return MimeUtility.decodeText( line );
-		}
-		catch( final UnsupportedEncodingException e ) {
-			return line;
-		}
+		return new String( data, 0, ofs, ISO_8859_1 );
 	}
 
 	static public void select( Selector sel, long timeout ) throws IOException

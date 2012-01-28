@@ -9,21 +9,20 @@
 	</parent>
 
 	<groupId>net.pi.sws</groupId>
-	<artifactId>sws-util</artifactId>
+	<artifactId>sws-test</artifactId>
+	<packaging>pom</packaging>
 
 	<name>${project.artifactId}</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.cojen</groupId>
-			<artifactId>cojen</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.pi.sws</groupId>
+				<artifactId>sws-maven-plugin</artifactId>
+				<configuration>
+					<root>web</root>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -7,6 +7,7 @@ import java.nio.channels.SocketChannel;
 
 import net.pi.sws.pool.Service;
 import net.pi.sws.pool.ServiceFactory;
+import net.pi.sws.util.ExtLog;
 
 /**
  * Factory of HTTP service.
@@ -17,10 +18,20 @@ public class HttpServiceFactory
 implements ServiceFactory
 {
 
+	static final ExtLog	L	= ExtLog.get();
+
+	static {
+		L.info( "Starting SWS" );
+
+		// preload methods
+		MethodFactory.getInstance();
+	}
+
 	private final File	root;
 
-	HttpServiceFactory( File root )
+	public HttpServiceFactory( File root )
 	{
+
 		this.root = root;
 	}
 

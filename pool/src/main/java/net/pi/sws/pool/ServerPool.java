@@ -77,7 +77,9 @@ implements LifeCycle
 		@Override
 		public void run()
 		{
-			L.info( "Starting loop" );
+			Thread.currentThread().setName( "loop" );
+
+			L.info( "Entering loop" );
 
 			try {
 				loop();
@@ -142,8 +144,11 @@ implements LifeCycle
 	{
 		final ServerSocketChannel chn = ServerSocketChannel.open();
 
+		L.info( "Binding to %s", address );
+
 		chn.socket().setReuseAddress( true );
 		chn.socket().bind( address );
+
 		chn.configureBlocking( false );
 		chn.register( this.sel, SelectionKey.OP_ACCEPT );
 	}
@@ -180,7 +185,7 @@ implements LifeCycle
 			throw new IllegalStateException();
 		}
 
-		L.info( "Starting SWS" );
+		L.info( "Starting pool" );
 
 		this.loop = new Loop();
 
@@ -193,7 +198,7 @@ implements LifeCycle
 			throw new IllegalStateException();
 		}
 
-		L.info( "Stopping SWS" );
+		L.info( "Stopping pool" );
 
 		this.exec.shutdown();
 

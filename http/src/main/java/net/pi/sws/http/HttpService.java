@@ -125,13 +125,10 @@ implements Service
 
 	private void doInvoke() throws IOException
 	{
-		L.trace( "%s: respond", this.context.state );
-
 		this.context.method.respond();
-
-		L.trace( "%s: flush", this.context.state );
-
 		this.context.method.flush();
+
+		L.trace( "%s", this.context.state );
 
 		if( this.context.keepAlive ) {
 			this.context = new StateContext();

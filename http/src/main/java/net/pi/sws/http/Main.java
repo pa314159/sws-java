@@ -77,13 +77,12 @@ public class Main
 
 	private Main( String host, int port, File root ) throws IOException
 	{
-		// preload methods
-		MethodFactory.getInstance();
-
 		final SocketAddress bind = new InetSocketAddress( host, port );
 		final HttpServiceFactory fact = new HttpServiceFactory( root );
 
 		this.pool = new ServerPool( bind, fact );
+
+		Runtime.getRuntime().addShutdownHook( new ShutdownHook( this.pool ) );
 	}
 
 	private void go() throws IOException

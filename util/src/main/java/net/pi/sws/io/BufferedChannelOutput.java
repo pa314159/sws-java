@@ -24,12 +24,12 @@ implements WritableByteChannel, Flushable
 
 	private final WritableByteChannel	out;
 
-	public BufferedChannelOutput( WritableByteChannel out )
+	public BufferedChannelOutput( WritableByteChannel out, boolean gzip )
 	{
-		this( out, 8192 );
+		this( out, gzip, 8192 );
 	}
 
-	public BufferedChannelOutput( WritableByteChannel out, int sz )
+	public BufferedChannelOutput( WritableByteChannel out, boolean gzip, int sz )
 	{
 		this.out = out;
 		this.data = new byte[sz];
@@ -45,7 +45,7 @@ implements WritableByteChannel, Flushable
 	@Override
 	public void flush() throws IOException
 	{
-		new ChannelOutputStream( this.out ).write( this.data, 0, this.offset );
+		IO.writeAll( this.out, this.data, 0, this.offset );
 
 		this.data = new byte[this.iniz];
 		this.offset = 0;
@@ -55,6 +55,11 @@ implements WritableByteChannel, Flushable
 	public boolean isOpen()
 	{
 		return this.out.isOpen();
+	}
+
+	public int size()
+	{
+		return this.offset;
 	}
 
 	@Override
@@ -70,10 +75,10 @@ implements WritableByteChannel, Flushable
 			this.data = temp;
 		}
 
-		ByteBuffer.wrap( this.data, this.offset, this.data.length - this.offset ).put( src );
+		src.get( this.data, this.offset, sz );
 
 		this.offset += sz;
 
-		return 0;
+		return sz;
 	}
 }

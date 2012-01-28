@@ -3,7 +3,6 @@ package net.pi.sws.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
 /**
@@ -27,23 +26,9 @@ extends OutputStream
 	}
 
 	@Override
-	public void write( byte[] b, int off, int len ) throws IOException
+	public void write( byte[] b, int offset, int size ) throws IOException
 	{
-		final ByteBuffer bb = ByteBuffer.wrap( b, off, len );
-
-		while( len > 0 ) {
-			final int transferred = this.channel.write( bb );
-
-			if( transferred == 0 ) {
-				continue;
-			}
-			if( transferred < 0 ) {
-				throw new IOException();
-			}
-
-			len -= transferred;
-			off += transferred;
-		}
+		IO.writeAll( this.channel, b, offset, size );
 	}
 
 	@Override

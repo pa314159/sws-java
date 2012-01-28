@@ -36,6 +36,8 @@ implements LifeCycle
 
 		public void run()
 		{
+			L.info( "Incoming connection from %s", this.chn.socket().getInetAddress() );
+
 			try {
 				this.chn.configureBlocking( false );
 				this.chn.socket().setTcpNoDelay( true );
@@ -125,7 +127,7 @@ implements LifeCycle
 
 		final NamedThreadFactory tf = new NamedThreadFactory( "sws-%02d", false );
 
-		// XXX review this
+		// TODO review this
 		this.exec = new ThreadPoolExecutor( 20, 20, 0L, TimeUnit.MILLISECONDS,
 			new ArrayBlockingQueue<Runnable>( 20 ), tf, new RejectPolicy() );
 	}

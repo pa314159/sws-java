@@ -119,8 +119,13 @@ extends HttpMethod
 
 		File file = new File( this.response.getRoot(), uri ).getCanonicalFile();
 
-		if( !file.exists() || !allowed( file ) ) {
+		if( !file.exists() ) {
 			this.response.setStatus( HttpCode.NOT_FOUND );
+
+			return;
+		}
+		if( !allowed( file ) ) {
+			this.response.setStatus( HttpCode.FORBIDDEN );
 
 			return;
 		}

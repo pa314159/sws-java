@@ -33,6 +33,8 @@ public class HttpCode
 
 	static public final HttpCode	VERSION_NOT_SUPPORTED	= new HttpCode( 505 );
 
+	public static final HttpCode	FORBIDDEN				= new HttpCode( 403 );
+
 	static private Properties loadBundle()
 	{
 		final Class<HttpCode> cls = HttpCode.class;
@@ -70,6 +72,11 @@ public class HttpCode
 	private HttpCode( int code )
 	{
 		this( code, Integer.toString( code ) );
+	}
+
+	public int intValue()
+	{
+		return this.code;
 	}
 
 	@Override

@@ -106,7 +106,7 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	void flush() throws IOException
 	{
-		if( !this.headFlushed && !this.output && (this.status.intValue() > 400) ) {
+		if( !this.headFlushed && !this.output && (this.status.intValue() >= 400) ) {
 			setHeader( new HttpHeader( HttpHeader.General.CONTENT_TYPE, "text/plain; charset=ISO-8859-1" ) );
 
 			getCharStream( IO.ISO_8859_1 ).write( this.status.toString() );

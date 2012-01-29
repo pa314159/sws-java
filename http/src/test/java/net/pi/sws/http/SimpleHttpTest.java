@@ -71,7 +71,7 @@ extends AbstractHttpTest
 
 		dump( response );
 
-		Assert.assertEquals( 404, response.getStatusLine().getStatusCode() );
+		Assert.assertEquals( HttpCode.FORBIDDEN.intValue(), response.getStatusLine().getStatusCode() );
 	}
 
 	protected void dump( final HttpResponse response ) throws IOException

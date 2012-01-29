@@ -3,14 +3,29 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
-<script type="text/javascript" src="default.js">	
+<script type="text/javascript" src="default.js">
+	
 </script>
 </head>
 <body>
 
-Hello!
-
-<form action="POST">
-</form>
+	Hello!
+	<form method="post">
+		<table>
+			<tr>
+				<td>username</td>
+				<td><input name="username" style="width: 100%" /></td>
+			</tr>
+			<tr>
+				<td>password</td>
+				<td><input name="password" type="password" style="width: 100%"/></td>
+			</tr>
+			<tfoot>
+				<tr>
+					<td colspan="2" align="right"><input name="submit" type="submit" value="login" /></td>
+				</tr>
+			</tfoot>
+		</table>
+	</form>
 </body>
 </html>

@@ -96,10 +96,8 @@ implements WritableByteChannel, Flushable
 			return 0;
 		}
 
-		final int ix = src.position();
-
 		if( !this.def.finished() ) {
-			this.def.setInput( src.array(), ix, sz );
+			setInput( src );
 
 			while( !this.def.needsInput() ) {
 				deflate();
@@ -107,6 +105,22 @@ implements WritableByteChannel, Flushable
 		}
 
 		return sz;
+	}
+
+	void setInput( ByteBuffer src )
+	{
+		if( src.hasArray() ) {
+			this.def.setInput( src.array(), src.position(), src.remaining() );
+
+			src.position( src.limit() );
+		}
+		else {
+			final byte[] data = new byte[src.remaining()];
+
+			src.get( data );
+
+			this.def.setInput( data );
+		}
 	}
 
 	private void deflate() throws IOException

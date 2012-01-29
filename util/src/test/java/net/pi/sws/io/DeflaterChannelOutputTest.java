@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -20,8 +19,6 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith( Parameterized.class )
 public class DeflaterChannelOutputTest
 {
-
-	private static final SecureRandom	RANDOM	= new SecureRandom();
 
 	@Parameters
 	static public List<Object[]> suite()
@@ -49,9 +46,11 @@ public class DeflaterChannelOutputTest
 		final ByteArrayOutputStream result = new ByteArrayOutputStream();
 
 		for( int k = 0; k < this.chunks; k++ ) {
-			final byte[] data = new byte[8192 * (k + 1)];
+			final byte[] data = new byte[10000 * (k + 1)];
 
-			RANDOM.nextBytes( data );
+			for( int j = 0; j < data.length; j++ ) {
+				data[j] = (byte) j;
+			}
 
 			final DeflaterOutputStream dos = new DeflaterOutputStream( expected );
 
@@ -74,9 +73,11 @@ public class DeflaterChannelOutputTest
 		final ByteArrayOutputStream result = new ByteArrayOutputStream();
 
 		for( int k = 0; k < this.chunks; k++ ) {
-			final byte[] data = new byte[8192 * (k + 1)];
+			final byte[] data = new byte[10000 * (k + 1)];
 
-			RANDOM.nextBytes( data );
+			for( int j = 0; j < data.length; j++ ) {
+				data[j] = (byte) j;
+			}
 
 			final Deflater def1 = new Deflater( 9 );
 			final DeflaterOutputStream dos = new DeflaterOutputStream( expected, def1 );
@@ -101,9 +102,11 @@ public class DeflaterChannelOutputTest
 		final ByteArrayOutputStream result = new ByteArrayOutputStream();
 
 		for( int k = 0; k < this.chunks; k++ ) {
-			final byte[] data = new byte[8192 * (k + 1)];
+			final byte[] data = new byte[10000 * (k + 1)];
 
-			RANDOM.nextBytes( data );
+			for( int j = 0; j < data.length; j++ ) {
+				data[j] = (byte) j;
+			}
 
 			final Deflater def1 = new Deflater( 9 );
 			final DeflaterOutputStream dos = new DeflaterOutputStream( expected, def1, 2048 );

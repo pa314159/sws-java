@@ -92,16 +92,21 @@ extends DeflaterChannelOutput
 	}
 
 	@Override
-	public int write( ByteBuffer src ) throws IOException
+	void setInput( ByteBuffer src )
 	{
-		final int ix = src.position();
-		final int sz = src.remaining();
+		if( src.hasArray() ) {
+			this.def.setInput( src.array(), src.position(), src.remaining() );
+			this.crc.update( src.array(), src.position(), src.remaining() );
 
-		try {
-			return super.write( src );
+			src.position( src.limit() );
 		}
-		finally {
-			this.crc.update( src.array(), ix, sz );
+		else {
+			final byte[] data = new byte[src.remaining()];
+
+			src.get( data );
+
+			this.def.setInput( data );
+			this.crc.update( data );
 		}
 	}
 

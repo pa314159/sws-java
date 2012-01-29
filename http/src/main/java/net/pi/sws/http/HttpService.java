@@ -104,6 +104,8 @@ implements Service
 			for( final CompressionType c : CompressionType.values() ) {
 				if( h.matches( c.pattern ) ) {
 					this.context.method.response.compression = c;
+
+					break;
 				}
 			}
 		}

@@ -7,8 +7,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
 /**
- * A buffered version of a channel. The channel keeps the data internally and expand it as needed. To actually write the
- * data to the wrapped channel one must call {@link #flush()}.
+ * A buffered version of a channel. The channel all keeps the data internally and expand it as needed. To actually write
+ * the data to the wrapped channel one must call {@link #flush()}.
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
@@ -24,12 +24,12 @@ implements WritableByteChannel, Flushable
 
 	private final WritableByteChannel	out;
 
-	public BufferedChannelOutput( WritableByteChannel out, boolean gzip )
+	public BufferedChannelOutput( WritableByteChannel out )
 	{
-		this( out, gzip, 8192 );
+		this( out, 8192 );
 	}
 
-	public BufferedChannelOutput( WritableByteChannel out, boolean gzip, int sz )
+	public BufferedChannelOutput( WritableByteChannel out, int sz )
 	{
 		this.out = out;
 		this.data = new byte[sz];
@@ -39,6 +39,8 @@ implements WritableByteChannel, Flushable
 	@Override
 	public void close() throws IOException
 	{
+		flush();
+
 		this.out.close();
 	}
 

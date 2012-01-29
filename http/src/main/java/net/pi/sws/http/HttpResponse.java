@@ -67,6 +67,8 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	CompressionType						compression;
 
+	private DeflaterChannelOutput		compressed;
+
 	HttpResponse( WritableByteChannel channel, File root ) throws IOException
 	{
 		super( channel );
@@ -110,8 +112,11 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 			if( this.flushable != null ) {
 				this.flushable.flush();
 			}
-
 			if( this.buffered != null ) {
+				if( this.compressed != null ) {
+					this.compressed.flush();
+				}
+
 				setHeader( new HttpHeader( General.CONTENT_LENGTH, this.buffered.size() ) );
 
 				if( this.compression != null ) {
@@ -166,24 +171,20 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 			this.buffered = new BufferedChannelOutput( channel );
 
 			if( this.compression != null ) {
-				final DeflaterChannelOutput zco;
-
 				switch( this.compression ) {
 					case gzip:
-						zco = new GZIPChannelOutput( this.buffered );
+						this.compressed = new GZIPChannelOutput( this.buffered );
 					break;
 
 					case deflate:
-						zco = new DeflaterChannelOutput( this.buffered );
+						this.compressed = new DeflaterChannelOutput( this.buffered );
 					break;
 
 					default:
 						throw new AssertionError( "unreachable or not implemented" );
 				}
 
-				this.flushable = zco;
-
-				return zco;
+				return this.compressed;
 			}
 			else {
 				return this.buffered;

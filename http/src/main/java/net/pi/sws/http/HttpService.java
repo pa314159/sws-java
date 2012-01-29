@@ -3,6 +3,7 @@ package net.pi.sws.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.channels.SocketChannel;
 import java.util.regex.Pattern;
 
@@ -176,7 +177,7 @@ implements Service
 			break;
 		}
 
-		final HttpRequest request = new HttpRequest( this.ic, uri );
+		final HttpRequest request = new HttpRequest( this.ic, URI.create( uri ).getPath() );
 		final HttpResponse response = new HttpResponse( this.oc, this.root );
 
 		if( method == null ) {

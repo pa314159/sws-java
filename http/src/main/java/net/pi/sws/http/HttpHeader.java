@@ -2,7 +2,10 @@
 package net.pi.sws.http;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.mail.internet.MimeUtility;
 
@@ -82,9 +85,9 @@ public class HttpHeader
 		return new HttpHeader( name, content );
 	}
 
-	final String	name;
+	final String				name;
 
-	final String	content;
+	private final List<String>	values	= new ArrayList<String>();
 
 	public HttpHeader( String name, Date value )
 	{
@@ -93,7 +96,7 @@ public class HttpHeader
 		}
 
 		this.name = name;
-		this.content = HttpDate.format( value );
+		this.values.add( HttpDate.format( value ) );
 	}
 
 	public HttpHeader( String name, int value )
@@ -103,7 +106,8 @@ public class HttpHeader
 		}
 
 		this.name = name;
-		this.content = Integer.toString( value );
+
+		addValue( value );
 	}
 
 	public HttpHeader( String name, long value )
@@ -113,7 +117,8 @@ public class HttpHeader
 		}
 
 		this.name = name;
-		this.content = Long.toString( value );
+
+		addValue( value );
 	}
 
 	public HttpHeader( String name, String content )
@@ -131,30 +136,106 @@ public class HttpHeader
 			content = "";
 		}
 
-		this.content = content;
+		final String[] values = content.split( "," );
+
+		for( final String v : values ) {
+			addValue( v.trim() );
+		}
 	}
 
-	public boolean is( String name, String content )
+	public void addValue( int value )
 	{
-		if( !this.name.equalsIgnoreCase( name ) ) {
+		this.values.add( Integer.toString( value ) );
+	}
+
+	public void addValue( long value )
+	{
+		this.values.add( Long.toString( value ) );
+	}
+
+	public void addValue( String value )
+	{
+		this.values.add( value );
+	}
+
+	public String getValue()
+	{
+		return this.values.isEmpty() ? null : this.values.get( 0 );
+	}
+
+	public String[] getValues()
+	{
+		return this.values.toArray( new String[0] );
+	}
+
+	public boolean is( String name )
+	{
+		return this.name.equalsIgnoreCase( name );
+	}
+
+	public boolean matches( Pattern pat )
+	{
+		// XXX the pattern could match an empty string, but that would be a nonsense, simply check getValue() against null
+		if( this.values.isEmpty() ) {
 			return false;
 		}
 
-		if( content != null ) {
-			return this.content.equalsIgnoreCase( content );
+		for( final String v : this.values ) {
+			if( pat.matcher( v ).matches() ) {
+				return true;
+			}
 		}
 
-		return true;
+		return false;
+	}
+
+	public void setValue( int value )
+	{
+		this.values.clear();
+
+		addValue( value );
+	}
+
+	public void setValue( long value )
+	{
+		this.values.clear();
+
+		addValue( value );
+	}
+
+	public void setValue( String value )
+	{
+		this.values.clear();
+
+		addValue( value );
 	}
 
 	@Override
 	public String toString()
 	{
+		final StringBuilder b = new StringBuilder();
+
+		b.append( this.name );
+		b.append( ": " );
+
+		for( int k = 0; k < this.values.size(); k++ ) {
+			if( k > 0 ) {
+				b.append( ", " );
+			}
+
+			b.append( encode( this.values.get( k ) ) );
+		}
+
+		return b.toString();
+	}
+
+	private String encode( String text )
+	{
 		try {
-			return String.format( "%s: %s", this.name, MimeUtility.encodeText( this.content ) );
+			return MimeUtility.encodeText( text );
 		}
 		catch( final UnsupportedEncodingException e ) {
-			return String.format( "%s: %s", this.name, this.content );
+			return text;
 		}
 	}
 }

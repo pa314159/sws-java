@@ -97,7 +97,7 @@ extends HttpMethod
 		final String uri = this.request.getURI();
 
 		// simple hack for icons
-		if( this.request.isHeaderPresent( Request.REFERER, null ) ) {
+		if( this.request.isHeaderPresent( Request.REFERER ) ) {
 			final byte[] data = ICONS.get( uri.substring( 1 ) );
 
 			if( data != null ) {

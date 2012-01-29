@@ -4,6 +4,7 @@ package net.pi.sws.http;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.regex.Pattern;
 
 import net.pi.sws.io.ChannelInput;
 import net.pi.sws.io.ChannelOutput;
@@ -40,17 +41,21 @@ implements Service
 		boolean		keepAlive;
 	}
 
-	private static final ExtLog	L		= ExtLog.get();
+	private static final Pattern	PAT_100_CONTINUE	= Pattern.compile( "100-continue", Pattern.CASE_INSENSITIVE );
 
-	private static final int	TIMEOUT	= 0;
+	private static final Pattern	PAT_KEEP_ALIVE		= Pattern.compile( "Keep-Alive", Pattern.CASE_INSENSITIVE );
 
-	private final File			root;
+	private static final ExtLog		L					= ExtLog.get();
 
-	private final ChannelOutput	oc;
+	private static final int		TIMEOUT				= 0;
 
-	private final ChannelInput	ic;
+	private final File				root;
 
-	private StateContext		context	= new StateContext();
+	private final ChannelOutput		oc;
+
+	private final ChannelInput		ic;
+
+	private StateContext			context				= new StateContext();
 
 	HttpService( File root, SocketChannel channel ) throws IOException
 	{
@@ -94,24 +99,23 @@ implements Service
 		final HttpRequest request = this.context.method.request;
 
 		// intercept compression
-		if( h.is( HttpHeader.Request.ACCEPT_ENCODING, null ) ) {
-			// TODO implement header parsing completely
-			if( h.content.contains( "gzip" ) ) {
-				this.context.method.response.gzip = true;
-
-				return; // filter it
+		if( h.is( HttpHeader.Request.ACCEPT_ENCODING ) ) {
+			for( final CompressionType c : CompressionType.values() ) {
+				if( h.matches( c.pattern ) ) {
+					this.context.method.response.compression = c;
+				}
 			}
 		}
 
 		// intercept Keep-Alive
 		// TODO RFC2068 says something about HTTP/1.0 persistent connections, but RFC1945 doesn't mention them
 		if( this.context.rfc != HttpRFC.RFC_1945 ) {
-			if( h.is( HttpHeader.Request.EXPECT, "100-continue" ) ) {
+			if( h.is( HttpHeader.Request.EXPECT ) && h.matches( PAT_100_CONTINUE ) ) {
 				this.context.keepAlive = true;
 
 				return; // filter it
 			}
-			if( h.is( HttpHeader.General.CONNECTION, "Keep-Alive" ) ) {
+			if( h.is( HttpHeader.General.CONNECTION ) && h.matches( PAT_KEEP_ALIVE ) ) {
 				this.context.rfc = HttpRFC.RFC_2068;
 
 				this.context.keepAlive = true;

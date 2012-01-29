@@ -34,10 +34,5 @@
 			<groupId>net.pi.sws</groupId>
 			<artifactId>sws-http</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-nop</artifactId>
-			<version>1.6.4</version>
-		</dependency>
 	</dependencies>
 </project>

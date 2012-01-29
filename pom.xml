@@ -141,6 +141,13 @@
 				<version>2.1</version>
 			</dependency>
 
+			<!-- test only dependencies -->
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.1</version>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
@@ -155,7 +162,7 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.14</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

@@ -14,11 +14,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 
-import javax.mail.internet.MimeUtility;
-
 import net.pi.sws.http.HttpHeader.General;
 import net.pi.sws.io.BufferedChannelOutput;
 import net.pi.sws.io.ChannelOutputStream;
+import net.pi.sws.io.DeflaterChannelOutput;
+import net.pi.sws.io.GZIPChannelOutput;
 import net.pi.sws.io.IO;
 import net.pi.sws.util.ExtLog;
 
@@ -47,7 +47,7 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 		}
 	}
 
-	private static final ExtLog			L		= ExtLog.get();
+	private static final ExtLog			L		= ExtLog.get( HttpService.class );
 
 	private static final byte[]			CRLF	= { 0x0d, 0x0a };
 
@@ -59,13 +59,13 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	private final File					root;
 
-	boolean								gzip;
-
 	private boolean						output;
 
 	private Flushable					flushable;
 
 	private BufferedChannelOutput		buffered;
+
+	CompressionType						compression;
 
 	HttpResponse( WritableByteChannel channel, File root ) throws IOException
 	{
@@ -114,6 +114,10 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 			if( this.buffered != null ) {
 				setHeader( new HttpHeader( General.CONTENT_LENGTH, this.buffered.size() ) );
 
+				if( this.compression != null ) {
+					setHeader( new HttpHeader( General.CONTENT_ENCODING, this.compression.name() ) );
+				}
+
 				flushHead();
 
 				this.buffered.flush();
@@ -155,11 +159,35 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 		channel = super.wrap( channel );
 
-		if( !this.gzip && isHeaderPresent( General.CONTENT_LENGTH, null ) ) {
+		if( (this.compression == null) && isHeaderPresent( General.CONTENT_LENGTH ) ) {
 			flushHead();
 		}
 		else {
-			return this.buffered = new BufferedChannelOutput( channel, this.gzip );
+			this.buffered = new BufferedChannelOutput( channel );
+
+			if( this.compression != null ) {
+				final DeflaterChannelOutput zco;
+
+				switch( this.compression ) {
+					case gzip:
+						zco = new GZIPChannelOutput( this.buffered );
+					break;
+
+					case deflate:
+						zco = new DeflaterChannelOutput( this.buffered );
+					break;
+
+					default:
+						throw new AssertionError( "unreachable or not implemented" );
+				}
+
+				this.flushable = zco;
+
+				return zco;
+			}
+			else {
+				return this.buffered;
+			}
 		}
 
 		return channel;
@@ -200,7 +228,7 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	private void write( HttpHeader h ) throws IOException
 	{
-		final String s = String.format( "%s: %s", h.name, MimeUtility.encodeText( h.content ) );
+		final String s = h.toString();
 
 		L.trace( "RESPONSE: %s", s );
 

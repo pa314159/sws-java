@@ -79,7 +79,7 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		return this.headers.values();
 	}
 
-	public final boolean isHeaderPresent( String name, String content )
+	public final boolean isHeaderPresent( String name )
 	{
 		final HttpHeader h = getHeader( name );
 
@@ -87,12 +87,9 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 			return false;
 		}
 
-		if( content != null ) {
-			return h.content.equalsIgnoreCase( content );
-		}
-		else {
-			return true;
-		}
+		assert h.is( name );
+
+		return true;
 	}
 
 	public void setHeader( HttpHeader h )

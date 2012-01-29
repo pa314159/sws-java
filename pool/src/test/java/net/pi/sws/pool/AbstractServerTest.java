@@ -15,7 +15,7 @@ public abstract class AbstractServerTest
 implements ServiceFactory
 {
 
-	static final int									PORT	= 31416;
+	static protected final InetSocketAddress			address	= new InetSocketAddress( 31416 );
 
 	protected final ValidReference<CompletionService>	service	= new ValidReference<CompletionService>();
 
@@ -35,9 +35,7 @@ implements ServiceFactory
 	@Before
 	public void setUp() throws IOException
 	{
-		final InetSocketAddress a = new InetSocketAddress( 31416 );
-
-		this.pool = new ServerPool( a, this );
+		this.pool = new ServerPool( address, this );
 
 		this.pool.start();
 	}

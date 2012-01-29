@@ -128,7 +128,7 @@ implements Service
 		this.context.method.respond();
 		this.context.method.flush();
 
-		L.trace( "%s", this.context.state );
+		L.trace( "%s:", this.context.state );
 
 		if( this.context.keepAlive ) {
 			this.context = new StateContext();

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import net.pi.sws.http.HttpCode;
 import net.pi.sws.http.HttpHeader;
 import net.pi.sws.http.HttpHeader.General;
 import net.pi.sws.http.HttpHeader.Request;
+import net.pi.sws.http.HttpHeader.Response;
 import net.pi.sws.http.HttpMethod;
 import net.pi.sws.http.HttpRequest;
 import net.pi.sws.http.HttpResponse;
@@ -37,6 +39,13 @@ extends HttpMethod
 		MimeUtil.registerMimeDetector( ExtensionMimeDetector.class.getName() );
 		MimeUtil.registerMimeDetector( MagicMimeMimeDetector.class.getName() );
 	}
+
+	/**
+	 * The default page in a directory.
+	 * 
+	 * TODO make it configurable some day.
+	 */
+	static final String							DEFAULT	= "default.html";
 
 	static private final Map<String, byte[]>	ICONS	= new HashMap<String, byte[]>();
 
@@ -88,6 +97,7 @@ extends HttpMethod
 
 			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, types.iterator().next().toString() ) );
 			this.response.setHeader( new HttpHeader( General.CONTENT_LENGTH, file.length() ) );
+			this.response.setHeader( new HttpHeader( Response.LAST_MODIFIED, new Date( file.lastModified() ) ) );
 		}
 	}
 
@@ -107,14 +117,24 @@ extends HttpMethod
 			}
 		}
 
-		final File file = new File( this.response.getRoot(), uri ).getCanonicalFile();
+		File file = new File( this.response.getRoot(), uri ).getCanonicalFile();
 
 		if( !file.exists() || !allowed( file ) ) {
 			this.response.setStatus( HttpCode.NOT_FOUND );
+
+			return;
 		}
-		else {
-			send( file );
+
+		if( file.isDirectory() ) {
+			// or should I send a redirect?
+			final File def = new File( file, DEFAULT );
+
+			if( def.isFile() ) {
+				file = def;
+			}
 		}
+
+		send( file );
 	}
 
 	private boolean allowed( File file )

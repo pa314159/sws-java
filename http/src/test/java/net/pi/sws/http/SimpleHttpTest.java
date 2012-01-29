@@ -60,10 +60,10 @@ extends AbstractHttpTest
 		dump( client.execute( host, request ) );
 	}
 
-	@Test( /* timeout = 30000 */)
-	public void outside() throws ClientProtocolException, IOException
+	@Test
+	public void section_15_3() throws ClientProtocolException, IOException
 	{
-		final HttpGet request = new HttpGet( "/src/../.." );
+		final HttpGet request = new HttpGet( "/.." );
 
 		request.addHeader( HttpHeader.General.CONNECTION, "close" );
 

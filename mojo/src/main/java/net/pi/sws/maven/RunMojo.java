@@ -53,9 +53,9 @@ extends AbstractMojo
 		LogManager.getLogManager().addLogger( root );
 
 		final SocketAddress bind = new InetSocketAddress( this.host, this.port );
-		final HttpServiceFactory fact = new HttpServiceFactory( this.root );
 
 		try {
+			final HttpServiceFactory fact = new HttpServiceFactory( this.root );
 			final ServerPool pool = new ServerPool( bind, fact );
 
 			pool.start();

@@ -29,10 +29,11 @@ implements ServiceFactory
 
 	private final File	root;
 
-	public HttpServiceFactory( File root )
+	public HttpServiceFactory( File root ) throws IOException
 	{
+		this.root = root.getCanonicalFile();
 
-		this.root = root;
+		L.info( "Serving files from %s", this.root );
 	}
 
 	@Override

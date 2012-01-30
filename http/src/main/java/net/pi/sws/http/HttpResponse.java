@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
+import java.util.Date;
 
 import net.pi.sws.http.HttpHeader.General;
 import net.pi.sws.io.BufferedChannelOutput;
@@ -78,6 +79,16 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 		setStatus( HttpCode.OK );
 		setHeader( SIGNATURE );
+		setHeader( new HttpHeader( "Date", new Date() ) );
+	}
+
+	public void disableCompression()
+	{
+		if( this.output ) {
+			throw new IllegalStateException( "The output has been already called" );
+		}
+
+		this.compression = null;
 	}
 
 	public File getRoot()

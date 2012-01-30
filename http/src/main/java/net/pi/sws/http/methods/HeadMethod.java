@@ -93,9 +93,15 @@ extends HttpMethod
 			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, "text/html; charset=UTF-8" ) );
 		}
 		else {
-			final Collection<MimeType> types = MimeUtil.getMimeTypes( file );
+			final Collection<MimeType> mimeTypes = MimeUtil.getMimeTypes( file );
+			final MimeType mimeType = mimeTypes.iterator().next();
 
-			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, types.iterator().next().toString() ) );
+			// small hack to make JS work on Firefox
+			if( "application".equalsIgnoreCase( mimeType.getMediaType() ) ) {
+				this.response.disableCompression();
+			}
+
+			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, mimeType.toString() ) );
 			this.response.setHeader( new HttpHeader( General.CONTENT_LENGTH, file.length() ) );
 			this.response.setHeader( new HttpHeader( Response.LAST_MODIFIED, new Date( file.lastModified() ) ) );
 		}

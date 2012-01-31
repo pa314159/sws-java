@@ -14,6 +14,11 @@ import java.nio.charset.Charset;
 import net.pi.sws.pool.Service;
 import net.pi.sws.util.ExtLog;
 
+/**
+ * A simple ECHO service.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public class EchoService
 implements Service
 {

@@ -158,6 +158,11 @@ public class HttpHeader
 		this.values.add( value );
 	}
 
+	public String getName()
+	{
+		return this.name;
+	}
+
 	public String getValue()
 	{
 		return this.values.isEmpty() ? null : this.values.get( 0 );

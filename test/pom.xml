@@ -10,7 +10,6 @@
 
 	<groupId>net.pi.sws</groupId>
 	<artifactId>sws-test</artifactId>
-	<packaging>pom</packaging>
 
 	<name>${project.artifactId}</name>
 
@@ -25,4 +24,11 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.pi.sws</groupId>
+			<artifactId>sws-http</artifactId>
+		</dependency>
+	</dependencies>
 </project>

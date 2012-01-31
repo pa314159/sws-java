@@ -98,7 +98,8 @@ var Class = (function() {
       parent = properties.shift();
 
     function klass() {
-      this.initialize.apply(this, arguments);
+      // modified by PAPPY
+      return this.initialize.apply(this, arguments);
     }
 
     Object.extend(klass, Class.Methods);

@@ -1,0 +1,28 @@
+.shape {
+	width: 120px;
+	height: 20px;
+	margin: 4px;
+	background-color: blue;
+}
+
+.shape_selected {
+	width: 120px;
+	height: 20px;
+	margin: 4px;
+	background-color: green;
+}
+
+.shape_shadow {
+	width: 120px;
+	height: 20px;
+	margin: 4px;
+	background-color: red;
+}
+
+.board {
+	background-color: silver;
+}
+
+.board_accept {
+	background-color: aqua;
+}

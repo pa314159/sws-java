@@ -11,8 +11,11 @@ import net.pi.sws.util.ClassPathScanner;
 import net.pi.sws.util.ExtLog;
 
 /**
- * HTTP method factory. The method is chosen based on the request line. The implemented methods are found by scanning
- * the classes and choosing those annotated with &#64;{@link HTTP}.
+ * HTTP method factory.
+ * <p>
+ * The method is chosen based on the request line. The implemented methods are found by scanning the classes and
+ * choosing those annotated with &#64;{@link HTTP}.
+ * </p>
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */

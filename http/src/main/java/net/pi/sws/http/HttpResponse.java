@@ -23,6 +23,11 @@ import net.pi.sws.io.GZIPChannelOutput;
 import net.pi.sws.io.IO;
 import net.pi.sws.util.ExtLog;
 
+/**
+ * The HTTP response object.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public class HttpResponse
 extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 {

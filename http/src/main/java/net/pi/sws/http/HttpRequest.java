@@ -11,10 +11,20 @@ import java.nio.charset.Charset;
 
 import net.pi.sws.io.ChannelInputStream;
 
+/**
+ * The HTTP request object.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public class HttpRequest
 extends HttpMessage<ReadableByteChannel, InputStream, Reader>
 {
 
+	/**
+	 * A reading channel implementation whose input is limited to a certain value.
+	 * 
+	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+	 */
 	static public class LimitedChannelInput
 	implements ReadableByteChannel
 	{

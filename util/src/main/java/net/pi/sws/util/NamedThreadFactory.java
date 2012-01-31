@@ -4,6 +4,11 @@ package net.pi.sws.util;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.ThreadFactory;
 
+/**
+ * Customisable thread factory.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public class NamedThreadFactory
 implements ThreadFactory
 {

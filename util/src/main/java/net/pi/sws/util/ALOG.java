@@ -1,11 +1,5 @@
-/*
- * Copyright (c) Ascelion Ltd. All rights reserved.
- *
- * ASCELION PROPRIETARY/CONFIDENTIAL.
- */
 
 package net.pi.sws.util;
-
 
 /**
  * @author PAPPY <a href="mailto:pa314159#64;gmail.com">&lt;pa314159#64;gmail.com&gt;</a>

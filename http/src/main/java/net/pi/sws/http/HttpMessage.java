@@ -9,6 +9,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Base of a HTTP message.
+ * 
+ * @see HttpRequest
+ * @see HttpResponse
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Closeable>
 {
 

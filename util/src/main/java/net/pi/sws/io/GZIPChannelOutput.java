@@ -10,7 +10,9 @@ import java.util.zip.Deflater;
 /**
  * GZIP wrapper over a {@link WritableByteChannel}.
  * 
- * <b>NOTE</b> The code is borrowed from {@link java.util.zip.GZIPOutputStream} by David Connelly.
+ * <p>
+ * <i><b>NOTE</b> The code is an adaptation of {@link java.util.zip.GZIPOutputStream} by David Connelly.</i>
+ * </p>
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
@@ -24,7 +26,7 @@ extends DeflaterChannelOutput
 	// Trailer size in bytes.
 	static private final int	TRAILER_SIZE	= 8;
 
-	//  GZIP member header.
+	// GZIP member header.
 	static private final byte[]	HEADER			= {
 												//
 		(byte) GZIP_MAGIC, // Magic number (short)
@@ -73,7 +75,7 @@ extends DeflaterChannelOutput
 			while( !this.def.finished() ) {
 				int len = this.def.deflate( this.buf, 0, this.buf.length );
 				if( this.def.finished() && (len <= (this.buf.length - TRAILER_SIZE)) ) {
-					// last deflater buffer. Fit trailer at the end 
+					// last deflater buffer. Fit trailer at the end
 					writeTrailer( this.buf, len );
 					len = len + TRAILER_SIZE;
 					IO.writeAll( this.out, this.buf, 0, len );

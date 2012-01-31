@@ -22,6 +22,11 @@ public class HttpService
 implements Service
 {
 
+	/**
+	 * States of the internal state machine.
+	 * 
+	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+	 */
 	enum State
 	{
 		REQUEST,
@@ -30,6 +35,11 @@ implements Service
 		CLOSE
 	}
 
+	/**
+	 * The execution context of the state machine.
+	 * 
+	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+	 */
 	static class StateContext
 	{
 
@@ -68,6 +78,11 @@ implements Service
 		this.ic = new ChannelInput( channel, TIMEOUT );
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @see net.pi.sws.pool.Service#accept(java.nio.channels.SocketChannel)
+	 */
 	@Override
 	public void accept( SocketChannel channel ) throws IOException
 	{
@@ -82,6 +97,11 @@ implements Service
 		}
 	}
 
+	/**
+	 * Action performed in the {@link State#HEADER} state.
+	 * 
+	 * @throws IOException
+	 */
 	private void doHeader() throws IOException
 	{
 		final String line = IO.readLINE( this.ic );
@@ -130,6 +150,11 @@ implements Service
 		request.setHeader( h );
 	}
 
+	/**
+	 * Action performed in the {@link State#INVOKE} state.
+	 * 
+	 * @throws IOException
+	 */
 	private void doInvoke() throws IOException
 	{
 		this.context.method.respond();
@@ -145,6 +170,11 @@ implements Service
 		}
 	}
 
+	/**
+	 * Action performed in the {@link State#REQUEST} state.
+	 * 
+	 * @throws IOException
+	 */
 	private void doRequest() throws IOException
 	{
 		final String line = IO.readLINE( this.ic );

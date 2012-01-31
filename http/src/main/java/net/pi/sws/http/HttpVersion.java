@@ -3,6 +3,11 @@ package net.pi.sws.http;
 
 import java.io.IOException;
 
+/**
+ * Supported HTTP versions.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public enum HttpVersion
 {
 	HTTP1_0( "HTTP/1.0", HttpRFC.RFC_1945 ),

@@ -1,6 +1,12 @@
 
 package net.pi.sws.util;
 
+/**
+ * Yet another logging wrapper, supporting formatted logging in the <code>printf</code> style. Currently supports only
+ * JDK logging and LOG4J.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public final class ExtLog
 {
 

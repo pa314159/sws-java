@@ -24,7 +24,7 @@ import org.cojen.classfile.attribute.Annotation;
 import org.cojen.classfile.attribute.AnnotationsAttr;
 
 /**
- * Scanns the ClassLoader and the class path.
+ * Scans the ClassLoader and the class path.
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */

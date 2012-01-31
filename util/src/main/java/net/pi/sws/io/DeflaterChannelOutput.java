@@ -9,9 +9,11 @@ import java.nio.channels.WritableByteChannel;
 import java.util.zip.Deflater;
 
 /**
- * Deflate wrapper over a {@link WritableByteChannel}.
+ * Deflater wrapper over a {@link WritableByteChannel}.
  * 
- * <b>NOTE</b> The code is adapted from {@link java.util.zip.DeflaterOutputStream} by David Connelly.
+ * <p>
+ * <i><b>NOTE</b> The code is an adaptation of {@link java.util.zip.DeflaterOutputStream} by David Connelly. </i>
+ * </p>
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */

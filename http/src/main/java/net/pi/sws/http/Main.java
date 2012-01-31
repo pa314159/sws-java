@@ -10,6 +10,8 @@ import net.pi.sws.pool.ServerPool;
 import net.pi.sws.util.ExtLog;
 
 /**
+ * Main class.
+ * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
 public class Main

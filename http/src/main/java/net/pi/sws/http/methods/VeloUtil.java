@@ -20,6 +20,11 @@ import org.apache.velocity.runtime.log.LogChute;
 import org.apache.velocity.runtime.resource.Resource;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 
+/**
+ * Velocity utility.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 class VeloUtil
 implements LogChute
 {

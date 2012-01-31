@@ -10,6 +10,14 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Holder for objects representing the result of an asynchronous operation.
+ * <p>
+ * The class is similar to {@link java.util.concurrent.Future} but provides more control of the result.
+ * </p>
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public final class ValidReference<T>
 {
 

@@ -8,9 +8,7 @@
 </head>
 <script type="text/javascript">
 	Event.observe(window, 'load', function() {
-		Event.observe(document.body, 'mousemove', function() {
-			Global.trace('CONTENT: move');
-		});
+		Global.bind(document, document.documentElement);
 	});
 </script>
 <body>

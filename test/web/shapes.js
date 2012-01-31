@@ -1,29 +1,67 @@
-/** Holds global variables */
-var Global = {};
 
-/** A trace function used for debugging */
-Global.trace = function() {
+/** A console output */
+var Console = {};
+
+Console.TRACE = 0;
+Console.INFO = 1;
+
+Console.outLevel = Console.INFO;
+
+Console.out = function() {
+	var level = arguments[0];
+	
+	if( level < Console.outLevel ) return;
+
 	var win = window.parent || window;
 	var con = win.document.getElementById('console');
 
-	if (con) {
-		var text = '' + new Date() + " ";
+	var text = "" + new Date() + " ";
 
-		for ( var k = 0; k < arguments.length; k++) {
-			text += arguments[k];
-		}
+	for ( var k = 1; k < arguments.length; k++) {
+		text += arguments[k];
+	}
 
-		// console.innerHTML = text;
+
+	if( con ) {
 		con.appendChild(document.createTextNode(text));
 		con.appendChild(document.createElement('BR'));
 
 		con.scrollTop = con.scrollHeight - con.clientHeight;
 	}
+	else if( level >= Console.INFO ) {
+		alert(text);
+	}
 };
 
+Console.traceEvent = function(t, event) {
+	event = $(event);
+	
+	Console.out(Console.TRACE, "EVENT(", t, "): target =", event.target, ", targetId = ", event.target.id,
+			", pointer = [", event.pointerX(), ", ", event.pointerY(), "]",
+			", ");
+};
+/** Holds global variables */
+var Global = {};
+
 /** Initialize the application */
+
 Global.init = function() {
 	Global.top = new Top(window.document);
+};
+
+/** Helper to investigate mouse events */
+Global.bind = function(document, element) {
+	var o = new Base(document, element);
+	
+	o.bindMove(true);
+	o.bindOver(true);
+	o.bindDown(true);
+	o.bindDone(true);
+	o.bindGone(true);
+	
+	o.childElements().each(function(element){
+		Global.bind(document, element);
+	});
 };
 
 /** The top document */
@@ -70,17 +108,37 @@ var Base = Class.create({
 			this.onmouseup = null;
 		}
 	},
+	bindGone : function(set) {
+		if (set) {
+			this.onmouseout = this.mouseGone.bindAsEventListener(this);
+		} else {
+			this.onmouseout = null;
+		}
+	},
 	mouseOver : function(event) {
-		event.stop();
+		Console.traceEvent("over", event);
+		
+		return true;
 	},
 	mouseDown : function(event) {
-		event.stop();
+		Console.traceEvent("down", event);
+		
+		return true;
 	},
 	mouseMove : function(event) {
-		event.stop();
+		Console.traceEvent("move", event);
+		
+		return true;
+	},
+	mouseGone : function(event) {
+		Console.traceEvent("gone", event);
+		
+		return true;
 	},
 	mouseDone : function(event) {
-		event.stop();
+		Console.traceEvent("done", event);
+		
+		return true;
 	},
 });
 
@@ -88,6 +146,7 @@ var Base = Class.create({
 var Top = Class.create(Base, {
 	source : null,
 	panels : $A(),
+	ajax : {parameters: {}},
 
 	initialize : function($super, document) {
 		var obj = $super(document, document.body);
@@ -116,8 +175,6 @@ var Top = Class.create(Base, {
 
 		if( !frame ) {
 			frame = event.target.ownerDocument.frame;
-
-//			Global.trace("NULL");
 		}
 		
 		var offset = frame.cumulativeOffset();
@@ -125,7 +182,7 @@ var Top = Class.create(Base, {
 		offset.left += event.pointerX();
 		offset.top += event.pointerY();
 
-		Global.trace("frame = ", frame.id, "offset = ", offset);
+		Console.out(Console.TRACE, "frame = ", frame.id, ", offset = ", offset);
 
 		var panel = this.panels.detect(function(panel) {
 			var f = $(panel.document.frame);
@@ -144,7 +201,7 @@ var Top = Class.create(Base, {
 		});
 
 		if (panel) {
-			Global.trace("frame = " + panel.document.frame.id);
+			Console.out(Console.TRACE, "frame = " + panel.document.frame.id);
 		}
 		
 		return { panel: panel, offset: offset };
@@ -152,7 +209,7 @@ var Top = Class.create(Base, {
 	dragMove : function(event) {
 		event.stop();
 		
-		this.findPanel(event);
+//		this.findPanel(event);
 //
 //		if( result.panel ) {
 //			var o = result.panel.document.frame.cumulativeOffset();
@@ -170,6 +227,8 @@ var Top = Class.create(Base, {
 	dragDone : function(event) {
 		event.stop();
 
+		this.bindMove(false);
+
 		if (this.source) {
 			var result = this.findPanel(event);
 			
@@ -177,10 +236,17 @@ var Top = Class.create(Base, {
 				shape.drop(result.panel, result.offset);
 			});
 
-			this.source = null;
-		}
+			this.ajax.parameters.shapes = this.source.selected.length;
+			this.ajax.parameters.target = result.panel.document.frame.id;
+			this.ajax.parameters.dropX = event.pointerX();
+			this.ajax.parameters.dropY = event.pointerY();
 
-		this.bindMove(false);
+			this.source = null;
+
+			if( this.ajax.action ) {
+				new Ajax.Request(this.ajax.action, this.ajax);
+			}
+		}
 	},
 	bindMove : function(set) {
 		if (set) {
@@ -207,10 +273,16 @@ var Top = Class.create(Base, {
 	},
 	mouseOut : function(event) {
 		if (event.target == this.document.documentElement) {
-			Global.trace("mouseOut", event.target);
+			Console.out(Console.TRACE, "mouseOut", event.target);
 
 			this.dragDone(event);
 		}
+	},
+	setAjaxAction : function(action) {
+		this.ajax.action = action;
+	},
+	setAjaxCallback : function(callback) {
+		this.ajax.onSuccess = callback;
 	}
 });
 
@@ -343,7 +415,7 @@ var Moveable = Class.create(Shape, {
 		this.bindMove(false);
 	},
 	select : function(shape, control) {
-		Global.trace("select");
+		Console.out(Console.TRACE, "select");
 
 		shape.parentElement.select(shape, control);
 		shape.bindMove(false);
@@ -375,11 +447,13 @@ var Moveable = Class.create(Shape, {
 		var dx = event.pointerX() - offset.left;
 		var dy = event.pointerY() - offset.top;
 
-		Global.trace("dx = ", dx, "dy = ", dy);
+		Console.out(Console.TRACE, "dx = ", dx, "dy = ", dy);
 
 		this.shadow = new Shadow(dx, dy);
 
 		this.follow(event);
+		
+		this.hide();
 	},
 	drop : function(panel, offset) {
 		var x = offset.left - this.shadow.dx;
@@ -392,10 +466,11 @@ var Moveable = Class.create(Shape, {
 			y -= o.top;
 		}
 		
-		Global.trace("x = ", x, ", y = ", y);
+		Console.out(Console.TRACE, "x = ", x, ", y = ", y);
 
 		if (panel == this.parentElement) {
 			this.moveTo(x, y);
+			this.show();
 		}
 		else if (panel) {
 			panel.addShape(x, y);

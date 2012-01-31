@@ -19,10 +19,21 @@ import net.pi.sws.io.IO;
 import net.pi.sws.util.ExtLog;
 import net.pi.sws.util.NamedThreadFactory;
 
+/**
+ * A generic channel oriented TCP server, listening to a port and spawning accept handlers with each incoming request.
+ * 
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+ */
 public class ServerPool
 implements LifeCycle
 {
 
+	/**
+	 * The accept handler. Upon each incoming request, the server "accepts" the request and configure the channel in
+	 * non-blocking mode..
+	 * 
+	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+	 */
 	class Handler
 	implements Runnable
 	{
@@ -70,6 +81,11 @@ implements LifeCycle
 		}
 	}
 
+	/**
+	 * This is the listener loop, it uses one thread from the thread pool.
+	 * 
+	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+	 */
 	class Loop
 	implements Runnable
 	{
@@ -93,6 +109,11 @@ implements LifeCycle
 		}
 	}
 
+	/**
+	 * Rejection policy for thread pool, it simply closes the connection.
+	 * 
+	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+	 */
 	static class RejectPolicy
 	implements RejectedExecutionHandler
 	{
@@ -153,6 +174,9 @@ implements LifeCycle
 		chn.register( this.sel, SelectionKey.OP_ACCEPT );
 	}
 
+	/**
+	 * Returns is the primary listening address of the server.
+	 */
 	public SocketAddress getAddress()
 	{
 		return this.address;
@@ -179,6 +203,11 @@ implements LifeCycle
 		this.exec.setMaximumPoolSize( poolSize + 1 );
 	}
 
+	/**
+	 * Starts the server loop.
+	 * 
+	 * @see net.pi.sws.pool.LifeCycle#start()
+	 */
 	public synchronized void start()
 	{
 		if( this.loop != null ) {
@@ -192,6 +221,11 @@ implements LifeCycle
 		this.exec.execute( this.loop );
 	}
 
+	/**
+	 * Stops the server loop by sending a shutdown message to the thread pool.
+	 * 
+	 * @see net.pi.sws.pool.LifeCycle#stop(long)
+	 */
 	public synchronized void stop( long timeout ) throws InterruptedException, IOException
 	{
 		if( this.loop == null ) {

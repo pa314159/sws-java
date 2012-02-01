@@ -1,7 +1,6 @@
 
 package net.pi.sws.http;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.SocketChannel;
@@ -52,25 +51,28 @@ implements Service
 		boolean		keepAlive;
 	}
 
-	private static final Pattern	PAT_100_CONTINUE	= Pattern.compile( "100-continue", Pattern.CASE_INSENSITIVE );
+	private static final Pattern				PAT_100_CONTINUE	= Pattern
+																		.compile( "100-continue",
+																			Pattern.CASE_INSENSITIVE );
 
-	private static final Pattern	PAT_KEEP_ALIVE		= Pattern.compile( "Keep-Alive", Pattern.CASE_INSENSITIVE );
+	private static final Pattern				PAT_KEEP_ALIVE		= Pattern.compile( "Keep-Alive",
+																		Pattern.CASE_INSENSITIVE );
 
-	private static final ExtLog		L					= ExtLog.get();
+	private static final ExtLog					L					= ExtLog.get();
 
-	private static final int		TIMEOUT				= 0;
+	private static final int					TIMEOUT				= 0;
 
-	private final File				root;
+	private final ChannelOutput					oc;
 
-	private final ChannelOutput		oc;
+	private final ChannelInput					ic;
 
-	private final ChannelInput		ic;
+	private StateContext						context				= new StateContext();
 
-	private StateContext			context				= new StateContext();
+	private final AbstractHttpServiceFactory	fact;
 
-	HttpService( File root, SocketChannel channel ) throws IOException
+	protected HttpService( AbstractHttpServiceFactory fact, SocketChannel channel ) throws IOException
 	{
-		this.root = root;
+		this.fact = fact;
 
 		channel.configureBlocking( false );
 
@@ -210,7 +212,7 @@ implements Service
 		}
 
 		final HttpRequest request = new HttpRequest( this.ic, URI.create( uri ).getPath() );
-		final HttpResponse response = new HttpResponse( this.oc, this.root );
+		final HttpResponse response = new HttpResponse( this.oc );
 
 		if( method == null ) {
 			if( version == null ) {
@@ -221,7 +223,7 @@ implements Service
 			}
 		}
 		else {
-			this.context.method = MethodFactory.getInstance().get( method, request, response );
+			this.context.method = MethodFactory.getInstance().get( method, this.fact, request, response );
 		}
 
 		this.context.state = State.HEADER;

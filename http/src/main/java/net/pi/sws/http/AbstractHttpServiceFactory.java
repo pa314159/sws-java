@@ -1,7 +1,6 @@
 
 package net.pi.sws.http;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
@@ -14,7 +13,7 @@ import net.pi.sws.util.ExtLog;
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
-public class HttpServiceFactory
+public abstract class AbstractHttpServiceFactory
 implements ServiceFactory
 {
 
@@ -27,20 +26,15 @@ implements ServiceFactory
 		MethodFactory.getInstance();
 	}
 
-	private final File	root;
-
 	/**
-	 * Creates an new instance of type <code>HttpServiceFactory</code>.
+	 * Creates an new instance of type <code>AbstractHttpServiceFactory</code>.
 	 * 
 	 * @param root
 	 *            the root of the exposed file system.
 	 * @throws IOException
 	 */
-	public HttpServiceFactory( File root ) throws IOException
+	public AbstractHttpServiceFactory() throws IOException
 	{
-		this.root = root.getCanonicalFile();
-
-		L.info( "Serving files from %s", this.root );
 	}
 
 	/**
@@ -51,7 +45,7 @@ implements ServiceFactory
 	@Override
 	public Service create( SocketChannel channel ) throws IOException
 	{
-		return new HttpService( this.root, channel );
+		return new HttpService( this, channel );
 	}
 
 }

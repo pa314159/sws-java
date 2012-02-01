@@ -32,7 +32,8 @@
 		</dependency>
 		<dependency>
 			<groupId>net.pi.sws</groupId>
-			<artifactId>sws-http</artifactId>
+			<artifactId>sws-http-fs</artifactId>
 		</dependency>
 	</dependencies>
 </project>
+

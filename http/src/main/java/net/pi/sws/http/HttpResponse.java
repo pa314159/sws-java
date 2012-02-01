@@ -2,7 +2,6 @@
 package net.pi.sws.http;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,8 +62,6 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	private HttpCode					status;
 
-	private final File					root;
-
 	private boolean						output;
 
 	private Flushable					flushable;
@@ -75,12 +72,11 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	private DeflaterChannelOutput		compressed;
 
-	HttpResponse( WritableByteChannel channel, File root ) throws IOException
+	HttpResponse( WritableByteChannel channel ) throws IOException
 	{
 		super( channel );
 
 		this.channel = channel;
-		this.root = root.getCanonicalFile();
 
 		setStatus( HttpCode.OK );
 		setHeader( SIGNATURE );
@@ -96,11 +92,6 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 		}
 
 		this.compression = null;
-	}
-
-	public File getRoot()
-	{
-		return this.root;
 	}
 
 	@Override

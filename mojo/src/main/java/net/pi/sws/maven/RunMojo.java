@@ -13,7 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import net.pi.sws.http.HttpServiceFactory;
+import net.pi.sws.http.fs.HttpServiceFactory;
 import net.pi.sws.pool.ServerPool;
 
 import org.apache.maven.plugin.AbstractMojo;

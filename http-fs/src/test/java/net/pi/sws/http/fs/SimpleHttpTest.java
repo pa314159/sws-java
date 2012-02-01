@@ -1,10 +1,14 @@
 
-package net.pi.sws.http;
+package net.pi.sws.http.fs;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import junit.framework.Assert;
+
+import net.pi.sws.http.HttpCode;
+import net.pi.sws.http.HttpHeader;
+import net.pi.sws.http.HttpHeader.General;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;

@@ -1,5 +1,5 @@
 
-package net.pi.sws.http;
+package net.pi.sws.http.fs;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,6 +12,11 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.InflaterInputStream;
+
+import net.pi.sws.http.CompressionType;
+import net.pi.sws.http.HttpHeader;
+import net.pi.sws.http.HttpHeader.General;
+import net.pi.sws.http.HttpHeader.Request;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;

@@ -35,7 +35,7 @@ import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
  */
 @HTTP( "HEAD" )
 public class HeadMethod
-extends HttpMethod<HttpServiceFactory>
+extends HttpMethod<FsHttpServiceFactory>
 {
 
 	static {
@@ -82,7 +82,7 @@ extends HttpMethod<HttpServiceFactory>
 		ICONS.put( icon, data.toByteArray() );
 	}
 
-	HeadMethod( HttpServiceFactory fact, HttpRequest request, HttpResponse response )
+	HeadMethod( FsHttpServiceFactory fact, HttpRequest request, HttpResponse response )
 	{
 		super( fact, request, response );
 	}

@@ -76,7 +76,7 @@ implements FileFilter
 
 	private final Collection<FileInfo>	folders	= new TreeSet<FileInfo>();
 
-	GetMethod( HttpServiceFactory fact, HttpRequest request, HttpResponse response )
+	GetMethod( FsHttpServiceFactory fact, HttpRequest request, HttpResponse response )
 	{
 		super( fact, request, response );
 	}

@@ -23,7 +23,7 @@ import net.pi.sws.http.HttpHeader.General;
 import net.pi.sws.http.HttpMethod;
 import net.pi.sws.http.HttpRequest;
 import net.pi.sws.http.HttpResponse;
-import net.pi.sws.http.AbstractHttpServiceFactory;
+import net.pi.sws.http.HttpServiceFactory;
 import net.pi.sws.io.IO;
 import net.pi.sws.util.ExtLog;
 
@@ -32,14 +32,14 @@ import org.w3c.dom.Element;
 
 @HTTP( "POST" )
 public class PostMethod
-extends HttpMethod<AbstractHttpServiceFactory>
+extends HttpMethod<HttpServiceFactory>
 {
 
 	static private final ExtLog	L	= ExtLog.get();
 
 	private Document			dom;
 
-	public PostMethod( AbstractHttpServiceFactory fact, HttpRequest request, HttpResponse response )
+	public PostMethod( HttpServiceFactory fact, HttpRequest request, HttpResponse response )
 	{
 		super( fact, request, response );
 	}

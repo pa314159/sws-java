@@ -78,11 +78,7 @@ extends HttpMethod
 		}
 
 		try {
-			this.dom = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-
-			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, "text/xml" ) );
-
-			return this.dom;
+			return this.dom = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 		}
 		catch( final ParserConfigurationException e ) {
 			throw new IOException( "Cannot create XML document", e );
@@ -117,10 +113,9 @@ extends HttpMethod
 
 		L.info( "%s", map );
 
-		this.response.setHeader( new HttpHeader( HttpHeader.General.CONTENT_TYPE, "text/xml" ) );
-
 		final Element top = addElement( "request" );
 
+		// send back the request headers
 		final Element headers = addElement( "headers", top );
 
 		for( final HttpHeader h : this.request.getHeaders() ) {
@@ -135,6 +130,7 @@ extends HttpMethod
 			}
 		}
 
+		// send back the request parameters
 		final Element params = addElement( "parameters", top );
 
 		for( final Map.Entry<String, String> ent : map.entrySet() ) {
@@ -161,6 +157,9 @@ extends HttpMethod
 			final Transformer t = f.newTransformer();
 
 			t.setOutputProperty( OutputKeys.INDENT, "yes" );
+
+			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, "text/xml" ) );
+
 			t.transform( new DOMSource( this.dom ), new StreamResult( this.response.getCharStream( IO.UTF8 ) ) );
 		}
 		catch( final TransformerException e ) {

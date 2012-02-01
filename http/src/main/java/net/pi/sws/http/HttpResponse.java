@@ -89,6 +89,8 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	public void disableCompression()
 	{
+		L.trace( "Compression has been disabled" );
+
 		if( this.output ) {
 			throw new IllegalStateException( "The output has been already called" );
 		}

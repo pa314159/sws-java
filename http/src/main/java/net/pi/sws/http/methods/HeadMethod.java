@@ -97,7 +97,7 @@ extends HttpMethod
 			final MimeType mimeType = mimeTypes.iterator().next();
 
 			// small hack to make JS work on Firefox
-			if( "application".equalsIgnoreCase( mimeType.getMediaType() ) ) {
+			if( "javascript".equalsIgnoreCase( mimeType.getSubType() ) ) {
 				this.response.disableCompression();
 			}
 

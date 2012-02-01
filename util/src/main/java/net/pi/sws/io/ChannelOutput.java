@@ -8,7 +8,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 
-
 /**
  * Non blocking writable channel handling timeouts.
  * 

@@ -33,13 +33,6 @@ implements ServiceFactory
 
 	public static final String						DEFAULT	= CLASS.getName();
 
-	static {
-		L.info( "Starting SWS" );
-
-		// preload methods
-		MethodFactory.getInstance();
-	}
-
 	static public final HttpServiceFactory get( Map<String, Object> configuration )
 	{
 		String sfName = (String) configuration.get( DEFAULT );
@@ -60,9 +53,8 @@ implements ServiceFactory
 		if( sf == null ) {
 			sf = new HttpServiceFactory();
 		}
-		else {
-			configure( sf, configuration );
-		}
+
+		configure( sf, configuration );
 
 		return sf;
 	}
@@ -165,6 +157,14 @@ implements ServiceFactory
 		catch( final ClassNotFoundException e ) {
 			throw new ServiceConfigurationError( "Cannot create service " + sfName, e );
 		}
+	}
+
+	public HttpServiceFactory()
+	{
+		ExtLog.get( getClass() ).info( "Starting %s", HttpResponse.SIGNATURE );
+
+		// preload methods
+		MethodFactory.getInstance();
 	}
 
 	/**

@@ -15,7 +15,6 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import net.pi.sws.http.HttpServiceFactory;
-import net.pi.sws.http.fs.FsHttpServiceFactory;
 import net.pi.sws.pool.ServerPool;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -86,14 +85,9 @@ extends AbstractMojo
 			if( (this.configuration == null) || this.configuration.isEmpty() ) {
 				this.configuration = new HashMap<String, Object>();
 
-				root.info( "No HTTP factory configured, using " + FsHttpServiceFactory.class );
+				root.info( "No HTTP factory configured, will use service discovery" );
 
-				this.configuration.put( HttpServiceFactory.DEFAULT, FsHttpServiceFactory.class.getName() );
-
-				if( this.root == null ) {
-					root.severe( "The parameter 'root' is required for " + FsHttpServiceFactory.class );
-				}
-
+				// FS uses this
 				this.configuration.put( "root", this.root );
 			}
 

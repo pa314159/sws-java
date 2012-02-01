@@ -111,7 +111,7 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- public artefacts -->
+			<!-- project artefacts -->
 			<dependency>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-http</artifactId>

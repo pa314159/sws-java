@@ -20,6 +20,7 @@
 				<artifactId>sws-maven-plugin</artifactId>
 				<configuration>
 					<root>web</root>
+					<port>31416</port>
 				</configuration>
 			</plugin>
 		</plugins>

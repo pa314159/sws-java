@@ -1,8 +1,8 @@
 /** A console output */
 var Console = {};
 
-Console.TRACE = 0;
-Console.INFO = 1;
+Console.TRACE = 1;
+Console.INFO = 2;
 
 Console.outLevel = Console.INFO;
 
@@ -38,10 +38,34 @@ Console.traceEvent = function( t, event )
 {
 	event = $( event );
 
-	Console.out( Console.TRACE, "EVENT(", t, "): target =", event.target,
-	        ", targetId = ", event.target.id, ", pointer = [",
-	        event.pointerX(), ", ", event.pointerY(), "]", ", " );
+	Console.out( Console.TRACE, "EVENT(", t, "): target =", event.target, ", targetId = ", event.target.id,
+	        ", pointer = [", event.pointerX(), ", ", event.pointerY(), "]", ", " );
 };
+
+Console.init = function()
+{
+	var url = window.location.href;
+	var params = url.toQueryParams();
+	var level = params.console;
+
+	if( level ) {
+		level = level.toUpperCase();
+
+		try {
+			level = eval( Console[level] );
+
+			if( level ) {
+				this.outLevel = parseInt( level );
+			}
+		}
+		catch( e ) {
+			this.outLevel = Console.INFO;
+		}
+	}
+
+	this.out( Console.INFO, "LEVEL is ", Console.outLevel );
+};
+
 /** Holds global variables */
 var Global = {};
 

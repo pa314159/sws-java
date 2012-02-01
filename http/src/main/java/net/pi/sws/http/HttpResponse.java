@@ -31,7 +31,7 @@ public class HttpResponse
 extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 {
 
-	private static final HttpHeader		SIGNATURE;
+	static final HttpHeader				SIGNATURE;
 
 	static {
 		final InputStream is = HttpMethod.class.getResourceAsStream( "signature.txt" );

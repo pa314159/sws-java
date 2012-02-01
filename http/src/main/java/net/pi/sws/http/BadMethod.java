@@ -9,12 +9,13 @@ import java.io.IOException;
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
 final class BadMethod
-extends HttpMethod
+extends HttpMethod<AbstractHttpServiceFactory>
 {
 
-	BadMethod( HttpRequest request, HttpResponse response, HttpCode status ) throws IOException
+	BadMethod( HttpRequest request, HttpResponse response, HttpCode status )
+	throws IOException
 	{
-		super( request, response );
+		super( null, request, response );
 
 		response.setStatus( status );
 	}

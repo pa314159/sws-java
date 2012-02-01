@@ -1,5 +1,5 @@
 
-package net.pi.sws.http.methods;
+package net.pi.sws.http.fs;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -35,7 +35,7 @@ import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
  */
 @HTTP( "HEAD" )
 public class HeadMethod
-extends HttpMethod
+extends HttpMethod<HttpServiceFactory>
 {
 
 	static {
@@ -82,9 +82,9 @@ extends HttpMethod
 		ICONS.put( icon, data.toByteArray() );
 	}
 
-	HeadMethod( HttpRequest request, HttpResponse response )
+	HeadMethod( HttpServiceFactory fact, HttpRequest request, HttpResponse response )
 	{
-		super( request, response );
+		super( fact, request, response );
 	}
 
 	void send( byte[] data ) throws IOException
@@ -135,7 +135,7 @@ extends HttpMethod
 			}
 		}
 
-		File file = new File( this.response.getRoot(), uri ).getCanonicalFile();
+		File file = new File( this.fact.getRoot(), uri ).getCanonicalFile();
 
 		if( !file.exists() ) {
 			this.response.setStatus( HttpCode.NOT_FOUND );
@@ -162,7 +162,7 @@ extends HttpMethod
 
 	private boolean allowed( File file )
 	{
-		final File root = this.response.getRoot();
+		final File root = this.fact.getRoot();
 
 		while( file != null ) {
 			if( file.equals( root ) ) {

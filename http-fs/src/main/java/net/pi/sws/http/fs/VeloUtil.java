@@ -1,5 +1,5 @@
 
-package net.pi.sws.http.methods;
+package net.pi.sws.http.fs;
 
 import java.io.IOException;
 import java.io.InputStream;

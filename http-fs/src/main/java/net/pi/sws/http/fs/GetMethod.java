@@ -1,5 +1,5 @@
 
-package net.pi.sws.http.methods;
+package net.pi.sws.http.fs;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -76,9 +76,9 @@ implements FileFilter
 
 	private final Collection<FileInfo>	folders	= new TreeSet<FileInfo>();
 
-	GetMethod( HttpRequest request, HttpResponse response )
+	GetMethod( HttpServiceFactory fact, HttpRequest request, HttpResponse response )
 	{
-		super( request, response );
+		super( fact, request, response );
 	}
 
 	@Override
@@ -91,10 +91,10 @@ implements FileFilter
 		}
 
 		if( file.isFile() ) {
-			this.files.add( new FileInfo( this.response.getRoot(), file ) );
+			this.files.add( new FileInfo( this.fact.getRoot(), file ) );
 		}
 		else {
-			this.folders.add( new FileInfo( this.response.getRoot(), file ) );
+			this.folders.add( new FileInfo( this.fact.getRoot(), file ) );
 		}
 
 		return false;
@@ -133,7 +133,7 @@ implements FileFilter
 		vc.put( "files", this.files );
 		vc.put( "folders", this.folders );
 
-		final File root = this.response.getRoot();
+		final File root = this.fact.getRoot();
 
 		if( !file.equals( root ) ) {
 			vc.put( "DOTDOT", IO.pathOf( root, file.getParentFile() ) );

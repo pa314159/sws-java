@@ -19,6 +19,7 @@ import net.pi.sws.util.ExtLog;
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
+@SuppressWarnings( { "rawtypes", "unchecked" } )
 final class MethodFactory
 implements ClassPathScanner.Visitor
 {
@@ -26,6 +27,9 @@ implements ClassPathScanner.Visitor
 	static private final ExtLog			L			= ExtLog.get();
 
 	private static final MethodFactory	INSTANCE	= new MethodFactory();
+
+	private static final Class[]		ARGUMENTS	= new Class[] { AbstractHttpServiceFactory.class, HttpRequest.class,
+													HttpResponse.class };
 
 	static {
 		try {
@@ -47,7 +51,8 @@ implements ClassPathScanner.Visitor
 	{
 	}
 
-	public HttpMethod get( String met, HttpRequest request, HttpResponse response ) throws IOException
+	public HttpMethod get( String met, AbstractHttpServiceFactory fact, HttpRequest request, HttpResponse response )
+	throws IOException
 	{
 		final Constructor<? extends HttpMethod> ct = INSTANCE.methods.get( met );
 
@@ -86,8 +91,7 @@ implements ClassPathScanner.Visitor
 				throw new IOException( String.format( "Invalid @HTTP value for %s", clsName ) );
 			}
 
-			final Constructor<? extends HttpMethod> ct = cls.getDeclaredConstructor( HttpRequest.class,
-				HttpResponse.class );
+			final Constructor<? extends HttpMethod> ct = findCT( cls );
 
 			ct.setAccessible( true );
 
@@ -101,6 +105,54 @@ implements ClassPathScanner.Visitor
 		catch( final NoSuchMethodException e ) {
 			throw new IOException( clsName, e );
 		}
+	}
+
+	private Constructor<? extends HttpMethod> findCT( final Class<? extends HttpMethod> cls )
+	throws NoSuchMethodException
+	{
+		for( final Constructor ct : cls.getDeclaredConstructors() ) {
+			final Class[] types = ct.getParameterTypes();
+
+			if( types.length != ARGUMENTS.length ) {
+				continue;
+			}
+
+			boolean matches = true;
+
+			for( int k = 0; k < ARGUMENTS.length; k++ ) {
+				final Class t = types[k];
+				final Class e = ARGUMENTS[k];
+
+				if( e.isAssignableFrom( t ) ) {
+					continue;
+				}
+
+				matches = false;
+
+				break;
+			}
+
+			if( matches ) {
+				return ct;
+			}
+		}
+
+		final StringBuilder b = new StringBuilder();
+
+		b.append( cls.getName() );
+		b.append( "#<init>( " );
+
+		for( int k = 0; k < ARGUMENTS.length; k++ ) {
+			if( k > 0 ) {
+				b.append( ", " );
+			}
+
+			b.append( ARGUMENTS[k].getName() );
+		}
+
+		b.append( " )" );
+
+		throw new NoSuchMethodException( b.toString() );
 	}
 
 	private void scan() throws IOException

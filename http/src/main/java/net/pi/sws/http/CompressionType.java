@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
-enum CompressionType
+public enum CompressionType
 {
 	gzip,
 	deflate,

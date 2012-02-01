@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -18,6 +22,8 @@ import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * @goal run
+ * @requiresDependencyResolution compile
+ * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
 public class RunMojo
@@ -40,6 +46,15 @@ extends AbstractMojo
 	 */
 	private String	host;
 
+	/**
+     * Project classpath.
+     *
+     * @parameter default-value="${project.compileClasspathElements}"
+     * @required
+     * @readonly
+     */
+    private List<String> classpath;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
@@ -53,8 +68,18 @@ extends AbstractMojo
 		LogManager.getLogManager().addLogger( root );
 
 		final SocketAddress bind = new InetSocketAddress( this.host, this.port );
-
+		
 		try {
+			List<URL> clp = new ArrayList<URL>();
+			
+			for( String element : classpath ) {
+				clp.add(new File(element).toURI().toURL());
+			}
+
+			ClassLoader cld = new URLClassLoader(clp.toArray(new URL[0]), getClass().getClassLoader());
+
+			Thread.currentThread().setContextClassLoader(cld);
+
 			final HttpServiceFactory fact = new HttpServiceFactory( this.root );
 			final ServerPool pool = new ServerPool( bind, fact );
 

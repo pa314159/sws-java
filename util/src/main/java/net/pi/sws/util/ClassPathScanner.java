@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -92,10 +93,10 @@ public class ClassPathScanner
 
 		// check the classpath as well
 		final String sysClassPath = System.getProperty( "java.class.path", "" );
-		final String[] elements = sysClassPath.split( "(:|;)" );
+		final String[] elements = sysClassPath.split( File.pathSeparator );
 
 		for( final String element : elements ) {
-			final File file = new File( element );
+			final File file = new File( element ).getCanonicalFile();
 
 			if( file.exists() ) {
 				classPath.add( file.toURI().toURL() );
@@ -113,7 +114,7 @@ public class ClassPathScanner
 			return;
 		}
 
-		final File f = new File( u.getFile() );
+		final File f = new File( URLDecoder.decode(u.getFile(), "UTF-8" ) );
 
 		if( !f.exists() ) {
 			return;

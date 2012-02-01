@@ -62,6 +62,22 @@ extends AbstractHttpTest
 	}
 
 	@Test
+	public void headNotFound() throws ClientProtocolException, IOException
+	{
+		final HttpHead request = new HttpHead( "/not-found" );
+
+		for( int k = 0; k < 5; k++ ) {
+			final HttpResponse response = client.execute( host, request );
+
+			dump( response );
+		}
+
+		request.addHeader( HttpHeader.General.CONNECTION, "close" );
+
+		dump( client.execute( host, request ) );
+	}
+
+	@Test
 	public void section_15_3() throws ClientProtocolException, IOException
 	{
 		final HttpGet request = new HttpGet( "/.." );

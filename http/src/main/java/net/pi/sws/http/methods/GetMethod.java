@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 import net.pi.sws.http.HTTP;
+import net.pi.sws.http.HttpCode;
+import net.pi.sws.http.HttpHeader;
 import net.pi.sws.http.HttpRequest;
 import net.pi.sws.http.HttpResponse;
 import net.pi.sws.io.IO;
@@ -113,7 +115,13 @@ implements FileFilter
 	{
 		super.send( file );
 
-		if( file.isFile() ) {
+		final HttpCode status = this.response.getStatus();
+
+		if( status.intValue() >= 400 ) {
+			this.response.setHeader( new HttpHeader( HttpHeader.General.CONTENT_TYPE, "text/plain; charset=ISO-8859-1" ) );
+			this.response.getCharStream( IO.ISO_8859_1 ).write( status.toString() );
+		}
+		else if( file.isFile() ) {
 			sendFile( file );
 		}
 		else {

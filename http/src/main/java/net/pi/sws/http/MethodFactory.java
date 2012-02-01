@@ -28,7 +28,7 @@ implements ClassPathScanner.Visitor
 
 	private static final MethodFactory	INSTANCE	= new MethodFactory();
 
-	private static final Class[]		ARGUMENTS	= new Class[] { AbstractHttpServiceFactory.class, HttpRequest.class,
+	private static final Class[]		ARGUMENTS	= new Class[] { HttpServiceFactory.class, HttpRequest.class,
 													HttpResponse.class };
 
 	static {
@@ -51,7 +51,7 @@ implements ClassPathScanner.Visitor
 	{
 	}
 
-	public HttpMethod get( String met, AbstractHttpServiceFactory fact, HttpRequest request, HttpResponse response )
+	public HttpMethod get( String met, HttpServiceFactory fact, HttpRequest request, HttpResponse response )
 	throws IOException
 	{
 		final Constructor<? extends HttpMethod> ct = INSTANCE.methods.get( met );

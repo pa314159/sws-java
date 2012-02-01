@@ -8,12 +8,14 @@ import java.net.SocketAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.Map;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import net.pi.sws.http.fs.HttpServiceFactory;
+import net.pi.sws.http.HttpServiceFactory;
+import net.pi.sws.http.fs.FsHttpServiceFactory;
 import net.pi.sws.pool.ServerPool;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -32,19 +34,23 @@ extends AbstractMojo
 
 	/**
 	 * @parameter expression="${sws.root}"
-	 * @required
 	 */
-	private File			root;
+	private File				root;
 
 	/**
 	 * @parameter expression="${sws.port}" default-value="8080"
 	 */
-	private int				port;
+	private int					port;
 
 	/**
 	 * @parameter expression="${sws.host}" default-value="127.0.0.1"
 	 */
-	private String			host;
+	private String				host;
+
+	/**
+	 * @parameter
+	 */
+	private Map<String, Object>	configuration;
 
 	/**
 	 * Project classpath.
@@ -53,23 +59,20 @@ extends AbstractMojo
 	 * @required
 	 * @readonly
 	 */
-	private List<String>	classpath;
+	private List<String>		classpath;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
-		LogManager.getLogManager().reset();
-
-		final Logger root = Logger.getLogger( "net.pi.sws" );
-
-		root.setLevel( Level.ALL );
-		root.addHandler( new MojoHandler( getLog() ) );
-
-		LogManager.getLogManager().addLogger( root );
-
-		final SocketAddress bind = new InetSocketAddress( this.host, this.port );
-
 		try {
+			LogManager.getLogManager().reset();
+
+			final Logger root = Logger.getLogger( "net.pi.sws" );
+
+			root.addHandler( new MojoHandler( getLog() ) );
+
+			LogManager.getLogManager().addLogger( root );
+
 			final List<URL> clp = new ArrayList<URL>();
 
 			for( final String element : this.classpath ) {
@@ -80,7 +83,22 @@ extends AbstractMojo
 
 			Thread.currentThread().setContextClassLoader( cld );
 
-			final HttpServiceFactory fact = new HttpServiceFactory( this.root );
+			if( (this.configuration == null) || this.configuration.isEmpty() ) {
+				this.configuration = new HashMap<String, Object>();
+
+				root.info( "No HTTP factory configured, using " + FsHttpServiceFactory.class );
+
+				this.configuration.put( HttpServiceFactory.DEFAULT, FsHttpServiceFactory.class.getName() );
+
+				if( this.root == null ) {
+					root.severe( "The parameter 'root' is required for " + FsHttpServiceFactory.class );
+				}
+
+				this.configuration.put( "root", this.root );
+			}
+
+			final SocketAddress bind = new InetSocketAddress( this.host, this.port );
+			final HttpServiceFactory fact = HttpServiceFactory.get( this.configuration );
 			final ServerPool pool = new ServerPool( bind, fact );
 
 			pool.start();
@@ -96,5 +114,4 @@ extends AbstractMojo
 			throw new MojoExecutionException( "Cannot start SWS", e );
 		}
 	}
-
 }

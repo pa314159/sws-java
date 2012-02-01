@@ -17,7 +17,7 @@ import net.pi.sws.util.ExtLog;
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
-public class HttpService
+final class HttpService
 implements Service
 {
 
@@ -51,26 +51,23 @@ implements Service
 		boolean		keepAlive;
 	}
 
-	private static final Pattern				PAT_100_CONTINUE	= Pattern
-																		.compile( "100-continue",
-																			Pattern.CASE_INSENSITIVE );
+	private static final Pattern		PAT_100_CONTINUE	= Pattern.compile( "100-continue", Pattern.CASE_INSENSITIVE );
 
-	private static final Pattern				PAT_KEEP_ALIVE		= Pattern.compile( "Keep-Alive",
-																		Pattern.CASE_INSENSITIVE );
+	private static final Pattern		PAT_KEEP_ALIVE		= Pattern.compile( "Keep-Alive", Pattern.CASE_INSENSITIVE );
 
-	private static final ExtLog					L					= ExtLog.get();
+	private static final ExtLog			L					= ExtLog.get();
 
-	private static final int					TIMEOUT				= 0;
+	private static final int			TIMEOUT				= 0;
 
-	private final ChannelOutput					oc;
+	private final ChannelOutput			oc;
 
-	private final ChannelInput					ic;
+	private final ChannelInput			ic;
 
-	private StateContext						context				= new StateContext();
+	private StateContext				context				= new StateContext();
 
-	private final AbstractHttpServiceFactory	fact;
+	private final HttpServiceFactory	fact;
 
-	protected HttpService( AbstractHttpServiceFactory fact, SocketChannel channel ) throws IOException
+	HttpService( HttpServiceFactory fact, SocketChannel channel ) throws IOException
 	{
 		this.fact = fact;
 

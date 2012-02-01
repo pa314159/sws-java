@@ -41,7 +41,7 @@ extends AbstractServerTest
 	@Before
 	public void setUp() throws IOException
 	{
-		this.fact = new HttpServiceFactory( root() );
+		this.fact = new FsHttpServiceFactory( root() );
 
 		super.setUp();
 	}

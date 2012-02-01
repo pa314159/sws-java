@@ -80,7 +80,7 @@ public class Main
 	private Main( String host, int port, File root ) throws IOException
 	{
 		final SocketAddress bind = new InetSocketAddress( host, port );
-		final HttpServiceFactory fact = new HttpServiceFactory( root );
+		final FsHttpServiceFactory fact = new FsHttpServiceFactory( root );
 
 		this.pool = new ServerPool( bind, fact );
 

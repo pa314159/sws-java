@@ -4,7 +4,7 @@
 
 	<groupId>net.pi</groupId>
 	<artifactId>sws</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1-AGNOSTIC</version>
 
 	<packaging>pom</packaging>
 
@@ -116,30 +116,30 @@
 			<dependency>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-http</artifactId>
-				<version>0.1-SNAPSHOT</version>
+				<version>0.1-AGNOSTIC</version>
 			</dependency>
 			<dependency>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-http-fs</artifactId>
-				<version>0.1-SNAPSHOT</version>
+				<version>0.1-AGNOSTIC</version>
 			</dependency>
 
 			<!-- internal artefacts -->
 			<dependency>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-util</artifactId>
-				<version>0.1-SNAPSHOT</version>
+				<version>0.1-AGNOSTIC</version>
 			</dependency>
 			<dependency>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-pool</artifactId>
-				<version>0.1-SNAPSHOT</version>
+				<version>0.1-AGNOSTIC</version>
 			</dependency>
 			<dependency>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-pool</artifactId>
 				<classifier>tests</classifier>
-				<version>0.1-SNAPSHOT</version>
+				<version>0.1-AGNOSTIC</version>
 				<scope>test</scope>
 			</dependency>
 

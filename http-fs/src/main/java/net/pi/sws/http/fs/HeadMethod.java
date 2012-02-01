@@ -139,13 +139,9 @@ extends HttpMethod<FsHttpServiceFactory>
 
 		if( !file.exists() ) {
 			this.response.setStatus( HttpCode.NOT_FOUND );
-
-			return;
 		}
 		if( !allowed( file ) ) {
 			this.response.setStatus( HttpCode.FORBIDDEN );
-
-			return;
 		}
 
 		if( file.isDirectory() ) {

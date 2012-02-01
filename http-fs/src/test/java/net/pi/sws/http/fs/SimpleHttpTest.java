@@ -8,8 +8,6 @@ import junit.framework.Assert;
 
 import net.pi.sws.http.HttpCode;
 import net.pi.sws.http.HttpHeader;
-import net.pi.sws.http.HttpHeader.General;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -49,10 +47,26 @@ extends AbstractHttpTest
 		dump( client.execute( host, request ) );
 	}
 
-	@Test( /* timeout = 30000 */)
+	@Test
 	public void head() throws ClientProtocolException, IOException
 	{
 		final HttpHead request = new HttpHead( "/HEAD.txt" );
+
+		for( int k = 0; k < 5; k++ ) {
+			final HttpResponse response = client.execute( host, request );
+
+			dump( response );
+		}
+
+		request.addHeader( HttpHeader.General.CONNECTION, "close" );
+
+		dump( client.execute( host, request ) );
+	}
+
+	@Test
+	public void headNotFound() throws ClientProtocolException, IOException
+	{
+		final HttpHead request = new HttpHead( "/phantom" );
 
 		for( int k = 0; k < 5; k++ ) {
 			final HttpResponse response = client.execute( host, request );

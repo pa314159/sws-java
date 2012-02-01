@@ -61,7 +61,7 @@ implements ClassPathScanner.Visitor
 		}
 
 		try {
-			return ct.newInstance( request, response );
+			return ct.newInstance( fact, request, response );
 		}
 		catch( final InstantiationException e ) {
 			return new BadMethod( request, response, HttpCode.INTERNAL_ERROR );

@@ -34,26 +34,26 @@ extends AbstractMojo
 	 * @parameter expression="${sws.root}"
 	 * @required
 	 */
-	private File	root;
+	private File			root;
 
 	/**
 	 * @parameter expression="${sws.port}" default-value="8080"
 	 */
-	private int		port;
+	private int				port;
 
 	/**
 	 * @parameter expression="${sws.host}" default-value="127.0.0.1"
 	 */
-	private String	host;
+	private String			host;
 
 	/**
-     * Project classpath.
-     *
-     * @parameter default-value="${project.compileClasspathElements}"
-     * @required
-     * @readonly
-     */
-    private List<String> classpath;
+	 * Project classpath.
+	 * 
+	 * @parameter default-value="${project.compileClasspathElements}"
+	 * @required
+	 * @readonly
+	 */
+	private List<String>	classpath;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
@@ -68,17 +68,17 @@ extends AbstractMojo
 		LogManager.getLogManager().addLogger( root );
 
 		final SocketAddress bind = new InetSocketAddress( this.host, this.port );
-		
+
 		try {
-			List<URL> clp = new ArrayList<URL>();
-			
-			for( String element : classpath ) {
-				clp.add(new File(element).toURI().toURL());
+			final List<URL> clp = new ArrayList<URL>();
+
+			for( final String element : this.classpath ) {
+				clp.add( new File( element ).toURI().toURL() );
 			}
 
-			ClassLoader cld = new URLClassLoader(clp.toArray(new URL[0]), getClass().getClassLoader());
+			final ClassLoader cld = new URLClassLoader( clp.toArray( new URL[0] ), getClass().getClassLoader() );
 
-			Thread.currentThread().setContextClassLoader(cld);
+			Thread.currentThread().setContextClassLoader( cld );
 
 			final HttpServiceFactory fact = new HttpServiceFactory( this.root );
 			final ServerPool pool = new ServerPool( bind, fact );

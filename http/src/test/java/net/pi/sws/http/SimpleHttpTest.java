@@ -3,6 +3,7 @@ package net.pi.sws.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import junit.framework.Assert;
 
 import org.apache.http.Header;

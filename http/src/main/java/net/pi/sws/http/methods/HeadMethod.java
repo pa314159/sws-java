@@ -1,3 +1,4 @@
+
 package net.pi.sws.http.methods;
 
 import java.io.ByteArrayOutputStream;
@@ -32,129 +33,139 @@ import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
  *         href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com
  *         &gt;</a>
  */
-@HTTP("HEAD")
-public class HeadMethod extends HttpMethod {
+@HTTP( "HEAD" )
+public class HeadMethod
+extends HttpMethod
+{
 
 	static {
-		MimeUtil.registerMimeDetector(ExtensionMimeDetector.class.getName());
-		MimeUtil.registerMimeDetector(MagicMimeMimeDetector.class.getName());
+		MimeUtil.registerMimeDetector( ExtensionMimeDetector.class.getName() );
+		MimeUtil.registerMimeDetector( MagicMimeMimeDetector.class.getName() );
 	}
 
-	static private final Pattern JS = Pattern.compile(".*javascript",
-			Pattern.CASE_INSENSITIVE);
+	static private final Pattern				JS		= Pattern.compile( ".*javascript",
+															Pattern.CASE_INSENSITIVE );
 
 	/**
 	 * The default page in a directory.
 	 * 
 	 * TODO make it configurable some day.
 	 */
-	static final String DEFAULT = "default.html";
+	static final String							DEFAULT	= "default.html";
 
-	static private final Map<String, byte[]> ICONS = new HashMap<String, byte[]>();
+	static private final Map<String, byte[]>	ICONS	= new HashMap<String, byte[]>();
 
 	static {
-		loadIcon("file.gif");
-		loadIcon("folder.gif");
+		loadIcon( "file.gif" );
+		loadIcon( "folder.gif" );
 	}
 
-	private static void loadIcon(String icon) {
-		final InputStream is = HeadMethod.class.getResourceAsStream(icon);
+	private static void loadIcon( String icon )
+	{
+		final InputStream is = HeadMethod.class.getResourceAsStream( icon );
 
-		if (is == null) {
-			throw new ExceptionInInitializerError(icon);
+		if( is == null ) {
+			throw new ExceptionInInitializerError( icon );
 		}
 
 		final ByteArrayOutputStream data = new ByteArrayOutputStream();
 
 		try {
-			IO.copy(is, data);
-		} catch (final IOException e) {
-			throw (Error) new ExceptionInInitializerError(icon).initCause(e);
+			IO.copy( is, data );
+		}
+		catch( final IOException e ) {
+			throw (Error) new ExceptionInInitializerError( icon ).initCause( e );
 		}
 
-		IO.close(is);
+		IO.close( is );
 
-		ICONS.put(icon, data.toByteArray());
+		ICONS.put( icon, data.toByteArray() );
 	}
 
-	HeadMethod(HttpRequest request, HttpResponse response) {
-		super(request, response);
+	HeadMethod( HttpRequest request, HttpResponse response )
+	{
+		super( request, response );
 	}
 
-	void send(byte[] data) throws IOException {
-		this.response.setHeader(new HttpHeader(General.CONTENT_TYPE,
-				"image/gif"));
-		this.response.setHeader(new HttpHeader(General.CONTENT_LENGTH,
-				data.length));
+	void send( byte[] data ) throws IOException
+	{
+		this.response.setHeader( new HttpHeader( General.CONTENT_TYPE,
+			"image/gif" ) );
+		this.response.setHeader( new HttpHeader( General.CONTENT_LENGTH,
+			data.length ) );
 	}
 
-	void send(File file) throws IOException {
-		if (file.isDirectory()) {
-			this.response.setHeader(new HttpHeader(General.CONTENT_TYPE,
-					"text/html; charset=UTF-8"));
-		} else {
-			final Collection<MimeType> mimeTypes = MimeUtil.getMimeTypes(file);
+	void send( File file ) throws IOException
+	{
+		if( file.isDirectory() ) {
+			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE,
+				"text/html; charset=UTF-8" ) );
+		}
+		else {
+			final Collection<MimeType> mimeTypes = MimeUtil.getMimeTypes( file );
 			final MimeType mimeType = mimeTypes.iterator().next();
 
 			// small hack to make JS work on Firefox
-			if( JS.matcher(mimeType.getSubType()).matches() ) {
+			if( JS.matcher( mimeType.getSubType() ).matches() ) {
 				this.response.disableCompression();
 			}
 
-			this.response.setHeader(new HttpHeader(General.CONTENT_TYPE,
-					mimeType.toString()));
-			this.response.setHeader(new HttpHeader(General.CONTENT_LENGTH, file
-					.length()));
-			this.response.setHeader(new HttpHeader(Response.LAST_MODIFIED,
-					new Date(file.lastModified())));
+			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE,
+				mimeType.toString() ) );
+			this.response.setHeader( new HttpHeader( General.CONTENT_LENGTH, file
+				.length() ) );
+			this.response.setHeader( new HttpHeader( Response.LAST_MODIFIED,
+				new Date( file.lastModified() ) ) );
 		}
 	}
 
 	@Override
-	protected final void respond() throws IOException {
+	protected final void respond() throws IOException
+	{
 		final String uri = this.request.getURI();
 
 		// simple hack for icons
-		if (this.request.isHeaderPresent(Request.REFERER)) {
-			final byte[] data = ICONS.get(uri.substring(1));
+		if( this.request.isHeaderPresent( Request.REFERER ) ) {
+			final byte[] data = ICONS.get( uri.substring( 1 ) );
 
-			if (data != null) {
-				send(data);
+			if( data != null ) {
+				send( data );
 
 				return;
 			}
 		}
 
-		File file = new File(this.response.getRoot(), uri).getCanonicalFile();
+		File file = new File( this.response.getRoot(), uri ).getCanonicalFile();
 
-		if (!file.exists()) {
-			this.response.setStatus(HttpCode.NOT_FOUND);
-
-			return;
-		}
-		if (!allowed(file)) {
-			this.response.setStatus(HttpCode.FORBIDDEN);
+		if( !file.exists() ) {
+			this.response.setStatus( HttpCode.NOT_FOUND );
 
 			return;
 		}
+		if( !allowed( file ) ) {
+			this.response.setStatus( HttpCode.FORBIDDEN );
 
-		if (file.isDirectory()) {
+			return;
+		}
+
+		if( file.isDirectory() ) {
 			// or should I send a redirect?
-			final File def = new File(file, DEFAULT);
+			final File def = new File( file, DEFAULT );
 
-			if (def.isFile()) {
+			if( def.isFile() ) {
 				file = def;
 			}
 		}
 
-		send(file);
+		send( file );
 	}
 
-	private boolean allowed(File file) {
+	private boolean allowed( File file )
+	{
 		final File root = this.response.getRoot();
 
-		while (file != null) {
-			if (file.equals(root)) {
+		while( file != null ) {
+			if( file.equals( root ) ) {
 				break;
 			}
 

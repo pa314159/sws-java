@@ -114,7 +114,7 @@ public class ClassPathScanner
 			return;
 		}
 
-		final File f = new File( URLDecoder.decode(u.getFile(), "UTF-8" ) );
+		final File f = new File( URLDecoder.decode( u.getFile(), "UTF-8" ) );
 
 		if( !f.exists() ) {
 			return;

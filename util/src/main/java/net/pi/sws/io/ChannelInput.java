@@ -8,7 +8,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-
 /**
  * Non blocking readable channel handling timeouts.
  * 

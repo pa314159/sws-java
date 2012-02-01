@@ -180,7 +180,8 @@ public class HttpHeader
 
 	public boolean matches( Pattern pat )
 	{
-		// XXX the pattern could match an empty string, but that would be a nonsense, simply check getValue() against null
+		// XXX the pattern could match an empty string, but that would be a nonsense, simply check getValue() against
+		// null
 		if( this.values.isEmpty() ) {
 			return false;
 		}

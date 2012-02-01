@@ -234,9 +234,7 @@ var Top = Class.create( Base, {
 	    offset.left += event.pointerX();
 	    offset.top += event.pointerY();
 
-	    Console
-	            .out( Console.TRACE, "frame = ", frame.id, ", offset = ",
-	                    offset );
+	    Console.out( Console.TRACE, "frame = ", frame.id, ", offset = ", offset );
 
 	    var panel = this.panels.detect( function( panel )
 	    {
@@ -262,19 +260,22 @@ var Top = Class.create( Base, {
 	        offset : offset
 	    };
     },
-    dragMove : function( event )
+    mouseMove : function( event, panel )
     {
 	    event.stop();
 
-	    var target = this.source.document.frame || event.target;
-	    var offset = $( target ).cumulativeOffset();
+	    var offset = null;
+
+	    if( panel ) {
+		    offset = $( panel.document.frame ).cumulativeOffset();
+	    }
 
 	    this.source.selected.each( function( shape )
 	    {
 		    shape.follow( event, offset );
 	    } );
     },
-    dragDone : function( event )
+    mouseDone : function( event )
     {
 	    event.stop();
 
@@ -288,23 +289,24 @@ var Top = Class.create( Base, {
 			    shape.drop( result.panel, result.offset );
 		    } );
 
-		    this.ajax.parameters.shapes = this.source.selected.length;
-		    this.ajax.parameters.target = result.panel.document.frame.id;
-		    this.ajax.parameters.dropX = event.pointerX();
-		    this.ajax.parameters.dropY = event.pointerY();
+		    if( result.panel ) {
+			    this.ajax.parameters.shapes = this.source.selected.length;
+			    this.ajax.parameters.target = result.panel.document.frame.id;
+			    this.ajax.parameters.dropX = event.pointerX();
+			    this.ajax.parameters.dropY = event.pointerY();
 
-		    this.source = null;
-
-		    if( this.ajax.action ) {
-			    new Ajax.Request( this.ajax.action, this.ajax );
+			    if( this.ajax.action ) {
+				    new Ajax.Request( this.ajax.action, this.ajax );
+			    }
 		    }
+		    
+		    this.source = null;
 	    }
     },
     bindMove : function( set )
     {
 	    if( set ) {
-		    this.document.onmousemove = this.dragMove
-		            .bindAsEventListener( this );
+		    this.document.onmousemove = this.mouseMove.bindAsEventListener( this );
 	    }
 	    else {
 		    this.document.onmousemove = null;
@@ -312,27 +314,17 @@ var Top = Class.create( Base, {
 
 	    this.panels.each( function( panel )
 	    {
-		    panel.document.onmousemove = this.document.onmousemove;
+		    panel.bindMove( set );
 	    } );
     },
     bindDone : function()
     {
-	    this.document.onmouseup = this.dragDone.bindAsEventListener( this );
+	    this.document.onmouseup = this.mouseDone.bindAsEventListener( this );
 
 	    this.panels.each( function( panel )
 	    {
 		    panel.document.onmouseup = this.document.onmouseup;
 	    } );
-
-	    this.document.onmouseout = this.mouseOut.bindAsEventListener( this );
-    },
-    mouseOut : function( event )
-    {
-	    if( event.target == this.document.documentElement ) {
-		    Console.out( Console.TRACE, "mouseOut", event.target );
-
-		    this.dragDone( event );
-	    }
     },
     setAjaxAction : function( action )
     {
@@ -354,13 +346,32 @@ var Panel = Class.create( Base, {
 	    var obj = $super( doc, doc.body );
 
 	    doc.frame = frame;
+
 	    obj.className = 'panel';
+	    obj.id = frame.id + "_panel";
 
 	    for( var k = 0; k < count; k++ ) {
 		    obj.add( frame.id + "-" + (k + 1), 20, 4 + k * 24 );
 	    }
 
 	    return obj;
+    },
+    bindMove : function( set )
+    {
+	    if( set ) {
+		    this.document.onmousemove = this.mouseMove.bindAsEventListener( this );
+	    }
+	    else {
+		    this.document.onmousemove = null;
+	    }
+    },
+    bindDone : function()
+    {
+	    this.document.onmouseup = this.mouseDone.bindAsEventListener( this );
+    },
+    mouseMove : function( event )
+    {
+	    Global.top.mouseMove( event, this );
     },
     add : function( text, x, y )
     {
@@ -369,6 +380,8 @@ var Panel = Class.create( Base, {
 	    this.shapes.push( shape );
 
 	    shape.moveTo( x, y );
+	    
+	    return shape;
     },
     remove : function( shape )
     {
@@ -478,7 +491,7 @@ var Moveable = Class.create( Shape, {
 	    if( event.isLeftClick() ) {
 		    this.bindMove( true );
 
-		    this.selectId = this.select.delay( 0.2, this, event.ctrlKey );
+		    this.selectId = Moveable._select.delay( 0.2, this, event.ctrlKey );
 	    }
     },
     mouseDone : function( event )
@@ -487,12 +500,12 @@ var Moveable = Class.create( Shape, {
 
 	    this.bindMove( false );
     },
-    select : function( shape, control )
+    select : function( control )
     {
 	    Console.out( Console.TRACE, "select" );
 
-	    shape.parentElement.select( shape, control );
-	    shape.bindMove( false );
+	    this.parentElement.select( this, control );
+	    this.bindMove( false );
     },
     selectNow : function( set )
     {
@@ -507,6 +520,21 @@ var Moveable = Class.create( Shape, {
     {
 	    return this.className == 'shape_selected';
     },
+    float : function( event )
+    {
+	    var offset = this.cumulativeOffset();
+
+	    var dx = event.pointerX() - offset.left;
+	    var dy = event.pointerY() - offset.top;
+
+	    Console.out( Console.TRACE, "dx = ", dx, "dy = ", dy );
+
+	    this.shadow = new Shadow( this.innerHTML, dx, dy );
+
+	    this.follow( event );
+
+	    this.hide();
+    },
     follow : function( event, offset )
     {
 	    var x = event.pointerX() - this.shadow.dx;
@@ -518,21 +546,6 @@ var Moveable = Class.create( Shape, {
 	    }
 
 	    this.shadow.moveTo( x, y );
-    },
-    float : function( event )
-    {
-	    var offset = this.cumulativeOffset();
-
-	    var dx = event.pointerX() - offset.left;
-	    var dy = event.pointerY() - offset.top;
-
-	    Console.out( Console.TRACE, "dx = ", dx, "dy = ", dy );
-
-	    this.shadow = new Shadow(this.innerHTML, dx, dy );
-
-	    this.follow( event );
-
-	    this.hide();
     },
     drop : function( panel, offset )
     {
@@ -553,9 +566,12 @@ var Moveable = Class.create( Shape, {
 		    this.show();
 	    }
 	    else if( panel ) {
-		    panel.add( this.innerHTML, x, y );
+		    panel.add( this.innerHTML, x, y ).selectNow();
 
 		    this.parentElement.remove( this );
+	    }
+	    else {
+	    	this.show();
 	    }
 
 	    Global.top.removeChild( this.shadow );
@@ -563,3 +579,8 @@ var Moveable = Class.create( Shape, {
 	    this.shadow = null;
     }
 } );
+
+Moveable._select = function(shape, control) {
+	shape.select(control);
+};
+

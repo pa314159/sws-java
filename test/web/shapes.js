@@ -527,7 +527,7 @@ var Moveable = Class.create( Shape, {
 	    var dx = event.pointerX() - offset.left;
 	    var dy = event.pointerY() - offset.top;
 
-	    Console.out( Console.TRACE, "dx = ", dx, "dy = ", dy );
+	    Console.out( Console.TRACE, "dx = ", dx, ", dy = ", dy );
 
 	    this.shadow = new Shadow( this.innerHTML, dx, dy );
 

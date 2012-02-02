@@ -31,7 +31,25 @@ implements ClassPathScanner.Visitor
 	private static final Class[]		ARGUMENTS	= new Class[] { HttpServiceFactory.class, HttpRequest.class,
 													HttpResponse.class };
 
+	private static final String			CT_SIGNATURE;
+
 	static {
+		final StringBuilder b = new StringBuilder();
+
+		b.append( "#<init>( " );
+
+		for( int k = 0; k < ARGUMENTS.length; k++ ) {
+			if( k > 0 ) {
+				b.append( ", " );
+			}
+
+			b.append( ARGUMENTS[k].getName() );
+		}
+
+		b.append( " )" );
+
+		CT_SIGNATURE = b.toString();
+
 		try {
 			INSTANCE.scan();
 		}
@@ -93,11 +111,29 @@ implements ClassPathScanner.Visitor
 
 			final Constructor<? extends HttpMethod> ct = findCT( cls );
 
-			ct.setAccessible( true );
+			final Constructor<? extends HttpMethod> oldCt = this.methods.get( met );
 
-			L.info( "%s is %s", met, clsName );
+			if( oldCt != null ) {
+				final Class<? extends HttpMethod> oldCls = ct.getDeclaringClass();
 
-			this.methods.put( met, ct );
+				if( oldCls.isAssignableFrom( cls ) ) {
+					L.info( "%s implementation %s overrides %s", met, clsName, oldCls.getName() );
+
+					this.methods.put( met, ct );
+				}
+				else if( cls.isAssignableFrom( oldCls ) ) {
+					L.info( "%s implementation %s overrides %s", met, oldCls.getName(), clsName );
+				}
+				else {
+					throw new IOException( String.format( "Found two independent implementations of method %s: %s and %s",
+						met, clsName, oldCls.getName() ) );
+				}
+			}
+			else {
+				L.info( "%s is %s", met, clsName );
+
+				this.methods.put( met, ct );
+			}
 		}
 		catch( final ClassNotFoundException e ) {
 			throw new IOException( clsName, e );
@@ -133,33 +169,22 @@ implements ClassPathScanner.Visitor
 			}
 
 			if( matches ) {
+				ct.setAccessible( true );
+
 				return ct;
 			}
 		}
 
-		final StringBuilder b = new StringBuilder();
-
-		b.append( cls.getName() );
-		b.append( "#<init>( " );
-
-		for( int k = 0; k < ARGUMENTS.length; k++ ) {
-			if( k > 0 ) {
-				b.append( ", " );
-			}
-
-			b.append( ARGUMENTS[k].getName() );
-		}
-
-		b.append( " )" );
-
-		throw new NoSuchMethodException( b.toString() );
+		throw new NoSuchMethodException( cls.getName() + CT_SIGNATURE );
 	}
 
 	private void scan() throws IOException
 	{
 		final ClassPathScanner cps = new ClassPathScanner( this );
 
-		cps.addPackage( "net.pi.sws." );
+		// cps.addPackage( "net.pi.sws." );
+		cps.addExclude( "^java/.+" );
+		cps.addExclude( "^javax/.+" );
 		cps.addAnnotation( HTTP.class );
 		cps.scan();
 	}

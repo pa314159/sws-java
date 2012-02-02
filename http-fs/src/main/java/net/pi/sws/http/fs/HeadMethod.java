@@ -29,9 +29,7 @@ import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
 /**
  * Implementation of HEAD
  * 
- * @author PAPPY <a
- *         href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com
- *         &gt;</a>
+ * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
 @HTTP( "HEAD" )
 public class HeadMethod

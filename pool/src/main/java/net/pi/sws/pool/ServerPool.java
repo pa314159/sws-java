@@ -20,7 +20,7 @@ import net.pi.sws.util.ExtLog;
 import net.pi.sws.util.NamedThreadFactory;
 
 /**
- * A generic channel oriented TCP server, listening to a port and spawning accept handlers with each incoming request.
+ * A generic channel based TCP server, listening to a port and spawning accept handlers with each incoming request.
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */

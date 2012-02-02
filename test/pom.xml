@@ -18,6 +18,7 @@
 			<plugin>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-maven-plugin</artifactId>
+				<version>${project.version}</version>
 				<configuration>
 					<root>web</root>
 					<port>31416</port>

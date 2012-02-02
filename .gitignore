@@ -9,5 +9,4 @@ classes/
 local.properties
 .project
 .classpath
-.settings
-/DESCRIPTION.txt
+DESCRIPTION.txt

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.pi</groupId>
 		<artifactId>sws</artifactId>
-		<version>0.1-AGNOSTIC</version>
+		<version>0.1-EXPERIMENTAL</version>
 	</parent>
 
 	<groupId>net.pi.sws</groupId>

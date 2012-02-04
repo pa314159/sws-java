@@ -124,15 +124,19 @@ public final class ValidReference<T>
 		this.lock.lock();
 
 		try {
-			while( true ) {
+			time = unit.toNanos( time );
+
+			while( time > 0 ) {
 				final T v = getAsIs();
 
 				if( this.check.isValid( v ) ) {
 					return v;
 				}
 
-				this.cond.await( time, unit );
+				time = this.cond.awaitNanos( time );
 			}
+
+			return getAsIs();
 		}
 		finally {
 			this.lock.unlock();

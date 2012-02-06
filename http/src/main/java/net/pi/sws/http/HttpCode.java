@@ -21,6 +21,8 @@ public class HttpCode
 
 	static public final HttpCode	OK						= new HttpCode( 200 );
 
+	public static final HttpCode	REDIRECT				= new HttpCode( 301 );
+
 	static public final HttpCode	BAD_REQUEST				= new HttpCode( 400 );
 
 	static public final HttpCode	NOT_FOUND				= new HttpCode( 404 );

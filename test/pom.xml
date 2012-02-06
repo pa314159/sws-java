@@ -20,7 +20,7 @@
 				<artifactId>sws-maven-plugin</artifactId>
 				<version>${project.version}</version>
 				<configuration>
-					<root>web</root>
+					<root>.</root>
 					<port>31416</port>
 				</configuration>
 			</plugin>

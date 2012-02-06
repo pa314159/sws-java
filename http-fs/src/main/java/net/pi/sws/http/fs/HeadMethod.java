@@ -85,38 +85,6 @@ extends HttpMethod<FsHttpServiceFactory>
 		super( fact, request, response );
 	}
 
-	void send( byte[] data ) throws IOException
-	{
-		this.response.setHeader( new HttpHeader( General.CONTENT_TYPE,
-			"image/gif" ) );
-		this.response.setHeader( new HttpHeader( General.CONTENT_LENGTH,
-			data.length ) );
-	}
-
-	void send( File file ) throws IOException
-	{
-		if( file.isDirectory() ) {
-			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE,
-				"text/html; charset=UTF-8" ) );
-		}
-		else {
-			final Collection<MimeType> mimeTypes = MimeUtil.getMimeTypes( file );
-			final MimeType mimeType = mimeTypes.iterator().next();
-
-			// small hack to make JS work on Firefox
-			if( JS.matcher( mimeType.getSubType() ).matches() ) {
-				this.response.disableCompression();
-			}
-
-			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE,
-				mimeType.toString() ) );
-			this.response.setHeader( new HttpHeader( General.CONTENT_LENGTH, file
-				.length() ) );
-			this.response.setHeader( new HttpHeader( Response.LAST_MODIFIED,
-				new Date( file.lastModified() ) ) );
-		}
-	}
-
 	@Override
 	protected final void respond() throws IOException
 	{
@@ -143,8 +111,22 @@ extends HttpMethod<FsHttpServiceFactory>
 		}
 
 		if( file.isDirectory() ) {
-			// or should I send a redirect?
 			final File def = new File( file, DEFAULT );
+
+			if( !this.request.getURI().endsWith( "/" ) ) {
+				this.response.setStatus( HttpCode.REDIRECT );
+
+				if( def.isFile() ) {
+					this.response.setHeader( new HttpHeader( Response.LOCATION, this.request.getURI() + "/" + DEFAULT ) );
+				}
+				else {
+					this.response.setHeader( new HttpHeader( Response.LOCATION, this.request.getURI() + "/" ) );
+				}
+
+				return;
+			}
+
+			// or should I send a redirect?
 
 			if( def.isFile() ) {
 				file = def;
@@ -152,6 +134,32 @@ extends HttpMethod<FsHttpServiceFactory>
 		}
 
 		send( file );
+	}
+
+	void send( byte[] data ) throws IOException
+	{
+		this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, "image/gif" ) );
+		this.response.setHeader( new HttpHeader( General.CONTENT_LENGTH, data.length ) );
+	}
+
+	void send( File file ) throws IOException
+	{
+		if( file.isDirectory() ) {
+			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, "text/html; charset=UTF-8" ) );
+		}
+		else {
+			final Collection<MimeType> mimeTypes = MimeUtil.getMimeTypes( file );
+			final MimeType mimeType = mimeTypes.iterator().next();
+
+			// small hack to make JS work on Firefox
+			if( JS.matcher( mimeType.getSubType() ).matches() ) {
+				this.response.disableCompression();
+			}
+
+			this.response.setHeader( new HttpHeader( General.CONTENT_TYPE, mimeType.toString() ) );
+			this.response.setHeader( new HttpHeader( General.CONTENT_LENGTH, file.length() ) );
+			this.response.setHeader( new HttpHeader( Response.LAST_MODIFIED, new Date( file.lastModified() ) ) );
+		}
 	}
 
 	private boolean allowed( File file )

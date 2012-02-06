@@ -61,6 +61,9 @@ public class HttpHeader
 		/** <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29">Section 14.29</a> */
 		String	LAST_MODIFIED	= "Last-Modified";
 
+		/** <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.30">Section 14.30</a> */
+		String	LOCATION		= "Location";
+
 		/** <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.38">Section 14.38</a> */
 		String	SERVER			= "Server";
 	}

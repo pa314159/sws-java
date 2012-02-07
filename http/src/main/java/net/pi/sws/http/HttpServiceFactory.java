@@ -164,7 +164,7 @@ implements ServiceFactory
 		ExtLog.get( getClass() ).info( "Starting %s", HttpResponse.SIGNATURE );
 
 		// preload methods
-		AnnotatedMethodFactory.getInstance();
+		// AnnotatedMethodFactory.getInstance();
 	}
 
 	/**

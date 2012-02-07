@@ -18,11 +18,11 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
-import org.cojen.classfile.Attribute;
-import org.cojen.classfile.ClassFile;
-import org.cojen.classfile.TypeDesc;
-import org.cojen.classfile.attribute.Annotation;
-import org.cojen.classfile.attribute.AnnotationsAttr;
+import com.jpattern.org.cojen.classfile.Attribute;
+import com.jpattern.org.cojen.classfile.ClassFile;
+import com.jpattern.org.cojen.classfile.TypeDesc;
+import com.jpattern.org.cojen.classfile.attribute.Annotation;
+import com.jpattern.org.cojen.classfile.attribute.AnnotationsAttr;
 
 /**
  * Scans the ClassLoader and the class path.

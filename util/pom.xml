@@ -15,8 +15,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.cojen</groupId>
-			<artifactId>cojen</artifactId>
+			<groupId>com.jpattern</groupId>
+			<artifactId>jpattern-cojen</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>

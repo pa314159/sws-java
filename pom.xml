@@ -24,7 +24,7 @@
 
 	<build>
 		<defaultGoal>install</defaultGoal>
-		
+
 		<resources>
 			<resource>
 				<directory>${project.build.sourceDirectory}</directory>
@@ -39,7 +39,7 @@
 				<filtering>false</filtering>
 			</resource>
 		</resources>
-		
+
 		<testResources>
 			<testResource>
 				<directory>${project.build.testSourceDirectory}</directory>
@@ -146,9 +146,9 @@
 
 			<!-- external dependencies -->
 			<dependency>
-				<groupId>org.cojen</groupId>
-				<artifactId>cojen</artifactId>
-				<version>2.2.1</version>
+				<groupId>com.jpattern</groupId>
+				<artifactId>jpattern-cojen</artifactId>
+				<version>2.2.2.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>

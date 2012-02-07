@@ -151,8 +151,10 @@ implements LifeCycle
 		final NamedThreadFactory tf = new NamedThreadFactory( "sws-%02d", false );
 
 		// TODO review this
-		this.exec = new ThreadPoolExecutor( 20, 20, 0L, TimeUnit.MILLISECONDS,
-			new ArrayBlockingQueue<Runnable>( 20 ), tf, new RejectPolicy() );
+		final ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>( 20 );
+		final RejectPolicy reject = new RejectPolicy();
+
+		this.exec = new ThreadPoolExecutor( 20, 20, 0L, TimeUnit.MILLISECONDS, queue, tf, reject );
 	}
 
 	/**

@@ -2,6 +2,7 @@
 package net.pi.sws.http;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.nio.channels.SocketChannel;
 import java.util.regex.Pattern;
@@ -67,11 +68,15 @@ implements Service
 
 	private final HttpServiceFactory	fact;
 
+	private final InetAddress			from;
+
 	HttpService( HttpServiceFactory fact, SocketChannel channel ) throws IOException
 	{
 		this.fact = fact;
 
 		channel.configureBlocking( false );
+
+		this.from = channel.socket().getInetAddress();
 
 		this.oc = new ChannelOutput( channel, TIMEOUT );
 		this.ic = new ChannelInput( channel, TIMEOUT );
@@ -208,7 +213,7 @@ implements Service
 			break;
 		}
 
-		final HttpRequest request = new HttpRequest( this.ic, URI.create( uri ).getPath() );
+		final HttpRequest request = new HttpRequest( this.ic, URI.create( uri ).getPath(), line, this.from );
 		final HttpResponse response = new HttpResponse( this.oc );
 
 		if( method == null ) {
@@ -220,7 +225,7 @@ implements Service
 			}
 		}
 		else {
-			this.context.method = MethodFactory.getInstance().get( method, this.fact, request, response );
+			this.context.method = this.fact.getMethodFactory().get( method, this.fact, request, response );
 		}
 
 		this.context.state = State.HEADER;

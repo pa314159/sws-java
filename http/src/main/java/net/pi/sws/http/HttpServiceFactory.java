@@ -164,7 +164,7 @@ implements ServiceFactory
 		ExtLog.get( getClass() ).info( "Starting %s", HttpResponse.SIGNATURE );
 
 		// preload methods
-		MethodFactory.getInstance();
+		AnnotatedMethodFactory.getInstance();
 	}
 
 	/**
@@ -178,4 +178,8 @@ implements ServiceFactory
 		return new HttpService( this, channel );
 	}
 
+	public MethodFactory<HttpServiceFactory> getMethodFactory()
+	{
+		return AnnotatedMethodFactory.getInstance();
+	}
 }

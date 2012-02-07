@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
@@ -74,13 +75,24 @@ extends HttpMessage<ReadableByteChannel, InputStream, Reader>
 		}
 	}
 
-	private final String	uri;
+	private final String		uri;
 
-	HttpRequest( ReadableByteChannel channel, String uri )
+	final String				requestLine;
+
+	private final InetAddress	remote;
+
+	HttpRequest( ReadableByteChannel channel, String uri, String requestLine, InetAddress remote )
 	{
 		super( channel );
 
 		this.uri = uri;
+		this.requestLine = requestLine;
+		this.remote = remote;
+	}
+
+	public InetAddress getRemoteAddress()
+	{
+		return this.remote;
 	}
 
 	public String getURI()

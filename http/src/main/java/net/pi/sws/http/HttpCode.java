@@ -65,15 +65,15 @@ public class HttpCode
 
 	private final String	text;
 
+	public HttpCode( int code )
+	{
+		this( code, Integer.toString( code ) );
+	}
+
 	public HttpCode( int code, String text )
 	{
 		this.code = code;
-		this.text = BUNDLE.getProperty( text, text );
-	}
-
-	private HttpCode( int code )
-	{
-		this( code, Integer.toString( code ) );
+		this.text = BUNDLE.getProperty( text, "UNKNOWN CODE" );
 	}
 
 	public int intValue()

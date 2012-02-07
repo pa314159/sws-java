@@ -108,11 +108,11 @@ extends HttpMethod
 		if( !file.exists() ) {
 			this.response.setStatus( HttpCode.NOT_FOUND );
 		}
+
 		if( !allowed( file ) ) {
 			this.response.setStatus( HttpCode.FORBIDDEN );
 		}
-
-		if( file.isDirectory() ) {
+		else if( file.isDirectory() ) {
 			if( !this.request.getURI().endsWith( "/" ) ) {
 				this.response.setStatus( HttpCode.REDIRECT );
 				this.response.setHeader( new HttpHeader( HttpHeader.Response.LOCATION, this.request.getURI() + "/" ) );

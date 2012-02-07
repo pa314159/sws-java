@@ -106,11 +106,11 @@ extends HttpMethod<FsHttpServiceFactory>
 		if( !file.exists() ) {
 			this.response.setStatus( HttpCode.NOT_FOUND );
 		}
+
 		if( !allowed( file ) ) {
 			this.response.setStatus( HttpCode.FORBIDDEN );
 		}
-
-		if( file.isDirectory() ) {
+		else if( file.isDirectory() ) {
 			final File def = new File( file, DEFAULT );
 
 			if( !this.request.getURI().endsWith( "/" ) ) {

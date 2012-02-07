@@ -178,7 +178,7 @@ implements ServiceFactory
 		return new HttpService( this, channel );
 	}
 
-	public MethodFactory<HttpServiceFactory> getMethodFactory()
+	public MethodFactory<? extends HttpServiceFactory> getMethodFactory()
 	{
 		return AnnotatedMethodFactory.getInstance();
 	}

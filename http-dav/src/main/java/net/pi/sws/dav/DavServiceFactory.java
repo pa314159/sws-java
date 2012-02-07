@@ -1,17 +1,25 @@
 
 package net.pi.sws.dav;
 
-import com.bradmcevoy.http.HttpManager;
 import net.pi.sws.http.HttpServiceFactory;
+import com.bradmcevoy.http.HttpManager;
 
 public class DavServiceFactory
 extends HttpServiceFactory
 {
 
-	final HttpManager	hm;
+	private final DavMethodFactory	mf	= new DavMethodFactory();
+
+	final HttpManager				hm;
 
 	public DavServiceFactory( HttpManager hm )
 	{
 		this.hm = hm;
+	}
+
+	@Override
+	public DavMethodFactory getMethodFactory()
+	{
+		return this.mf;
 	}
 }

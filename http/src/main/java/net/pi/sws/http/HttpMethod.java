@@ -24,11 +24,21 @@ public abstract class HttpMethod<F extends HttpServiceFactory>
 		this.response = response;
 	}
 
+	public HttpRequest getRequest()
+	{
+		return this.request;
+	}
+
+	public HttpResponse getResponse()
+	{
+		return this.response;
+	}
+
+	protected abstract void respond() throws IOException;
+
 	void flush() throws IOException
 	{
 		this.response.flush();
 	}
-
-	protected abstract void respond() throws IOException;
 
 }

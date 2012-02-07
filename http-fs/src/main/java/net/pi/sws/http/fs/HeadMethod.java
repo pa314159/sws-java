@@ -126,8 +126,6 @@ extends HttpMethod<FsHttpServiceFactory>
 				return;
 			}
 
-			// or should I send a redirect?
-
 			if( def.isFile() ) {
 				file = def;
 			}

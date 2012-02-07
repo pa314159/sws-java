@@ -35,7 +35,7 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		this.channel = channel;
 	}
 
-	public S getByteStream() throws IOException
+	public final S getByteStream() throws IOException
 	{
 		if( this.ioType == null ) {
 			this.ioType = IOType.ByteStream;
@@ -49,7 +49,7 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		throw new IllegalStateException( String.format( "Already called get%s()", this.ioType ) );
 	}
 
-	public C getChannel() throws IOException
+	public final C getChannel() throws IOException
 	{
 		if( this.ioType == null ) {
 			this.ioType = IOType.Channel;
@@ -63,7 +63,7 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		throw new IllegalStateException( String.format( "Already called get%s()", this.ioType ) );
 	}
 
-	public R getCharStream( Charset cs ) throws IOException
+	public final R getCharStream( Charset cs ) throws IOException
 	{
 		if( this.ioType == null ) {
 			this.ioType = IOType.CharStream;
@@ -77,14 +77,28 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		throw new IllegalStateException( String.format( "Already called get%s()", this.ioType ) );
 	}
 
-	public HttpHeader getHeader( String name )
+	public final HttpHeader getHeader( String name )
 	{
 		return this.headers.get( name.toLowerCase() );
 	}
 
-	public Collection<HttpHeader> getHeaders()
+	public final Collection<HttpHeader> getHeaders()
 	{
 		return this.headers.values();
+	}
+
+	public final String getHeaderValue( String name )
+	{
+		final HttpHeader h = getHeader( name );
+
+		return h != null ? h.getValue() : null;
+	}
+
+	public final String[] getHeaderValues( String name )
+	{
+		final HttpHeader h = getHeader( name );
+
+		return h != null ? h.getValues() : null;
 	}
 
 	public final boolean isHeaderPresent( String name )

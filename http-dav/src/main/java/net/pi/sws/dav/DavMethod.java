@@ -26,6 +26,9 @@ extends HttpMethod<DavServiceFactory>
 		final DavRequest davRequest = new DavRequest( this );
 		final DavResponse davResponse = new DavResponse( this );
 
+		davResponse.setCookie( "Cookie-1", "Value-1" );
+		davResponse.setCookie( "Cookie-2", "Value-2" );
+
 		this.fact.hm.process( davRequest, davResponse );
 	}
 }

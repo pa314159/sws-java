@@ -20,6 +20,10 @@
 		<module>util</module>
 	</modules>
 
+	<prerequisites>
+		<maven>3.0.3</maven>
+	</prerequisites>
+
 	<build>
 		<defaultGoal>install</defaultGoal>
 
@@ -202,6 +206,8 @@
 			<uniqueVersion>true</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>
+	
+	<inceptionYear>2012</inceptionYear>
 
 	<developers>
 		<developer>

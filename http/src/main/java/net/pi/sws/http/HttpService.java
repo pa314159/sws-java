@@ -225,7 +225,9 @@ implements Service
 			}
 		}
 		else {
-			this.context.method = this.fact.getMethodFactory().get( method, this.fact, request, response );
+			final MethodFactory mf = this.fact.getMethodFactory();
+
+			this.context.method = mf.get( method, this.fact, request, response );
 		}
 
 		this.context.state = State.HEADER;

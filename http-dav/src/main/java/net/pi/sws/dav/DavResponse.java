@@ -3,6 +3,7 @@ package net.pi.sws.dav;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,13 @@ extends AbstractResponse
 	@Override
 	public Map<String, String> getHeaders()
 	{
-		return null;
+		final Map<String, String> result = new HashMap<String, String>();
+
+		for( final HttpHeader h : this.request.getHeaders() ) {
+			result.put( h.getName(), h.getValue() );
+		}
+
+		return result;
 	}
 
 	@Override
@@ -71,13 +78,21 @@ extends AbstractResponse
 	@Override
 	public Cookie setCookie( Cookie cookie )
 	{
-		return null;
+		final MiltonCookie c = new MiltonCookie( cookie );
+
+		this.response.addCookie( c.cookie );
+
+		return c;
 	}
 
 	@Override
 	public Cookie setCookie( String name, String value )
 	{
-		return null;
+		final MiltonCookie c = new MiltonCookie( name, value );
+
+		this.response.addCookie( c.cookie );
+
+		return c;
 	}
 
 	@Override

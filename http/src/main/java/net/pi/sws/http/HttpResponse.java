@@ -9,10 +9,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.HttpCookie;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import net.pi.sws.http.HttpHeader.General;
 import net.pi.sws.io.BufferedChannelOutput;
@@ -72,6 +75,8 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	private DeflaterChannelOutput		compressed;
 
+	private final List<HttpCookie>		cookies	= new ArrayList<HttpCookie>();
+
 	HttpResponse( WritableByteChannel channel ) throws IOException
 	{
 		super( channel );
@@ -81,6 +86,11 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 		setStatus( HttpCode.OK );
 		setHeader( SIGNATURE );
 		setHeader( new HttpHeader( "Date", new Date() ) );
+	}
+
+	public void addCookie( HttpCookie cookie )
+	{
+		this.cookies.add( cookie );
 	}
 
 	public void disableCompression()
@@ -223,6 +233,11 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 		for( final HttpHeader h : getHeaders() ) {
 			write( h );
+		}
+
+		for( final HttpCookie c : this.cookies ) {
+			write( new HttpHeader( c ) );
+
 		}
 
 		eol();

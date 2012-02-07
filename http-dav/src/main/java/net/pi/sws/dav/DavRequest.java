@@ -3,6 +3,9 @@ package net.pi.sws.dav;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpCookie;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +31,8 @@ extends AbstractRequest
 
 	private Auth				auth;
 
+	private Map<String, Cookie>	cookies;
+
 	DavRequest( DavMethod method )
 	{
 		this.method = method;
@@ -50,13 +55,13 @@ extends AbstractRequest
 	@Override
 	public Cookie getCookie( String name )
 	{
-		return null;
+		return cookies().get( name );
 	}
 
 	@Override
 	public List<Cookie> getCookies()
 	{
-		return null;
+		return Arrays.asList( cookies().values().toArray( new Cookie[0] ) );
 	}
 
 	@Override
@@ -68,7 +73,13 @@ extends AbstractRequest
 	@Override
 	public Map<String, String> getHeaders()
 	{
-		return null;
+		final Map<String, String> result = new HashMap<String, String>();
+
+		for( final HttpHeader h : this.request.getHeaders() ) {
+			result.put( h.getName(), h.getValue() );
+		}
+
+		return result;
 	}
 
 	@Override
@@ -92,20 +103,32 @@ extends AbstractRequest
 	@Override
 	public String getRequestHeader( Header header )
 	{
-		final HttpHeader h = this.request.getHeader( header.name() );
-
-		return h != null ? h.getValue() : null;
+		return this.request.getHeaderValue( header.name() );
 	}
 
 	@Override
 	public void parseRequestParameters( Map<String, String> params, Map<String, FileItem> files ) throws RequestParseException
 	{
+		// throw new UnsupportedOperationException( "NOT YET IMPLEMENTED" );
 	}
 
 	@Override
 	public void setAuthorization( Auth auth )
 	{
 		this.auth = auth;
+	}
+
+	Map<String, Cookie> cookies()
+	{
+		if( this.cookies == null ) {
+			this.cookies = new HashMap<String, Cookie>();
+
+			for( final HttpCookie c : this.request.getCookies() ) {
+				this.cookies.put( c.getName(), new MiltonCookie( c ) );
+			}
+		}
+
+		return this.cookies;
 	}
 
 }

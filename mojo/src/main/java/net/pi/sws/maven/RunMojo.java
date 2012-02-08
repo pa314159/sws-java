@@ -23,7 +23,7 @@ import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * @goal run
- * @requiresDependencyResolution compile
+ * @requiresDependencyResolution test
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
@@ -37,9 +37,19 @@ extends AbstractMojo
 	private File				root;
 
 	/**
+	 * @parameter expression="${sws.factory}"
+	 */
+	private String				factory;
+
+	/**
 	 * @parameter expression="${sws.port}" default-value="8080"
 	 */
 	private int					port;
+
+	/**
+	 * @parameter expression="${sws.wait}" default-value="false"
+	 */
+	private boolean				wait;
 
 	/**
 	 * @parameter expression="${sws.host}" default-value="127.0.0.1"
@@ -49,7 +59,7 @@ extends AbstractMojo
 	/**
 	 * @parameter
 	 */
-	private Map<String, Object>	configuration;
+	private Map<String, Object>	properties;
 
 	/**
 	 * Project classpath.
@@ -60,20 +70,37 @@ extends AbstractMojo
 	 */
 	private List<String>		classpath;
 
+	/**
+	 * Project classpath.
+	 * 
+	 * @parameter default-value="${project.testClasspathElements}"
+	 * @required
+	 * @readonly
+	 */
+	private List<String>		testClasspath;
+
+	public RunMojo()
+	{
+	}
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
+
 		try {
 			LogManager.getLogManager().reset();
 
-			final Logger root = Logger.getLogger( "net.pi.sws" );
+			final Logger logger = Logger.getLogger( "net.pi.sws" );
 
-			root.addHandler( new MojoHandler( getLog() ) );
+			logger.addHandler( new MojoHandler( getLog() ) );
 
-			LogManager.getLogManager().addLogger( root );
+			LogManager.getLogManager().addLogger( logger );
 
 			final List<URL> clp = new ArrayList<URL>();
 
+			for( final String element : this.testClasspath ) {
+				clp.add( new File( element ).toURI().toURL() );
+			}
 			for( final String element : this.classpath ) {
 				clp.add( new File( element ).toURI().toURL() );
 			}
@@ -82,29 +109,59 @@ extends AbstractMojo
 
 			Thread.currentThread().setContextClassLoader( cld );
 
-			if( (this.configuration == null) || this.configuration.isEmpty() ) {
-				this.configuration = new HashMap<String, Object>();
-
-				root.info( "No HTTP factory configured, will use service discovery" );
-
-				// FS uses this
-				this.configuration.put( "root", this.root );
+			if( (this.properties == null) || this.properties.isEmpty() ) {
+				this.properties = new HashMap<String, Object>();
 			}
 
+			if( this.factory != null ) {
+				this.properties.put( HttpServiceFactory.DEFAULT, this.factory );
+			}
+
+			if( !this.properties.containsKey( "root" ) ) {
+				this.properties.put( "root", this.root );
+			}
+
+			final HttpServiceFactory fact = HttpServiceFactory.get( this.properties );
 			final SocketAddress bind = new InetSocketAddress( this.host, this.port );
-			final HttpServiceFactory fact = HttpServiceFactory.get( this.configuration );
 			final ServerPool pool = new ServerPool( bind, fact );
 
 			pool.start();
 
-			synchronized( pool ) {
-				pool.wait();
+			final Thread hook = new Thread()
+			{
+
+				@Override
+				public void run()
+				{
+					try {
+						pool.stop( 500 );
+					}
+					catch( final InterruptedException e ) {
+					}
+					catch( final IOException e ) {
+					}
+					finally {
+						synchronized( pool ) {
+							pool.notify();
+						}
+					}
+				}
+			};
+
+			Runtime.getRuntime().addShutdownHook( hook );
+
+			if( this.wait ) {
+				synchronized( pool ) {
+					try {
+						pool.wait();
+					}
+					catch( final InterruptedException e ) {
+						;
+					}
+				}
 			}
 		}
 		catch( final IOException e ) {
-			throw new MojoExecutionException( "Cannot start SWS", e );
-		}
-		catch( final InterruptedException e ) {
 			throw new MojoExecutionException( "Cannot start SWS", e );
 		}
 	}

@@ -1,21 +1,17 @@
 
 package net.pi.sws.http;
 
-import java.beans.Introspector;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
+import net.pi.sws.pool.LifeCycle;
 import net.pi.sws.pool.Service;
 import net.pi.sws.pool.ServiceFactory;
+import net.pi.sws.util.Configurator;
 import net.pi.sws.util.ExtLog;
 
 /**
@@ -24,7 +20,7 @@ import net.pi.sws.util.ExtLog;
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
 public class HttpServiceFactory
-implements ServiceFactory
+implements ServiceFactory, LifeCycle
 {
 
 	static private final ExtLog						L		= ExtLog.get();
@@ -38,12 +34,14 @@ implements ServiceFactory
 		String sfName = (String) configuration.get( DEFAULT );
 
 		if( sfName == null ) {
-			sfName = System.getProperty( HttpServiceFactory.class.getName() );
+			sfName = System.getProperty( DEFAULT );
 		}
 
 		HttpServiceFactory sf;
 
 		if( sfName == null ) {
+			L.info( "No HTTP factory configured, using discovery" );
+
 			sf = load();
 		}
 		else {
@@ -51,76 +49,21 @@ implements ServiceFactory
 		}
 
 		if( sf == null ) {
+			L.info( "Still no HTTP factory found, using default" );
+
 			sf = new HttpServiceFactory();
 		}
 
-		configure( sf, configuration );
+		try {
+			configuration.remove( DEFAULT );
+
+			Configurator.configure( sf, configuration );
+		}
+		catch( final Exception e ) {
+			L.warn( "Cannot configure factory %s", e, sfName );
+		}
 
 		return sf;
-	}
-
-	static private void configure( HttpServiceFactory sv, Map<String, Object> configuration )
-	{
-		for( Class<?> cls = sv.getClass(); cls != CLASS; cls = cls.getSuperclass() ) {
-			final HashMap<String, Object> conf = new HashMap<String, Object>( configuration );
-
-			for( final Method method : cls.getMethods() ) {
-				if( Modifier.isAbstract( method.getModifiers() ) ) {
-					continue;
-				}
-
-				if( !method.getName().startsWith( "set" ) ) {
-					continue;
-				}
-
-				final String propertyName = Introspector.decapitalize( method.getName().substring( 3 ) );
-
-				if( !conf.containsKey( propertyName ) ) {
-					continue;
-				}
-
-				final Object value = conf.get( propertyName );
-
-				try {
-					method.invoke( sv, value );
-
-					conf.remove( propertyName );
-				}
-				catch( final IllegalArgumentException e ) {
-					L.warn( "Cannot set property %s from %s", e, propertyName, value );
-				}
-				catch( final IllegalAccessException e ) {
-					L.warn( "Cannot set property %s from %s", e, propertyName, value );
-				}
-				catch( final InvocationTargetException e ) {
-					L.warn( "Cannot set property %s from %s", e, propertyName, value );
-				}
-			}
-
-			for( final Field field : cls.getDeclaredFields() ) {
-				final String propertyName = field.getName();
-
-				if( !conf.containsKey( propertyName ) ) {
-					continue;
-				}
-
-				final Object value = conf.get( propertyName );
-
-				field.setAccessible( true );
-
-				try {
-					field.set( sv, value );
-
-					conf.remove( propertyName );
-				}
-				catch( final IllegalArgumentException e ) {
-					L.warn( "Cannot assign field %s from %s", e, field, value );
-				}
-				catch( final IllegalAccessException e ) {
-					L.warn( "Cannot assign field %s from %s", e, field, value );
-				}
-			}
-		}
 	}
 
 	static private HttpServiceFactory load()
@@ -159,14 +102,6 @@ implements ServiceFactory
 		}
 	}
 
-	public HttpServiceFactory()
-	{
-		ExtLog.get( getClass() ).info( "Starting %s", HttpResponse.SIGNATURE );
-
-		// preload methods
-		// AnnotatedMethodFactory.getInstance();
-	}
-
 	/**
 	 * {@inheritDoc}
 	 * 
@@ -181,5 +116,20 @@ implements ServiceFactory
 	public MethodFactory<? extends HttpServiceFactory> getMethodFactory()
 	{
 		return AnnotatedMethodFactory.getInstance();
+	}
+
+	@Override
+	public void start() throws IOException
+	{
+		L.info( "Starting %s", HttpResponse.SIGNATURE );
+
+		// preload methods
+		AnnotatedMethodFactory.getInstance();
+	}
+
+	@Override
+	public void stop( long timeout ) throws InterruptedException, IOException
+	{
+		L.info( "Stopping %s", HttpResponse.SIGNATURE );
 	}
 }

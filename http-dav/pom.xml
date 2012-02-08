@@ -27,7 +27,6 @@
 			<groupId>com.ettrema</groupId>
 			<artifactId>milton-filesystem</artifactId>
 			<version>1.6.8</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

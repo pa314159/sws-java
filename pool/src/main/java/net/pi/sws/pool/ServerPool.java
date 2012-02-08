@@ -47,6 +47,9 @@ implements LifeCycle
 
 		public void run()
 		{
+			Thread.currentThread().setName(
+				String.format( "accept@%08x@%s", System.identityHashCode( this ), this.chn.socket().getLocalSocketAddress() ) );
+
 			L.info( "Incoming connection from %s", this.chn.socket().getInetAddress() );
 
 			try {
@@ -93,7 +96,7 @@ implements LifeCycle
 		@Override
 		public void run()
 		{
-			Thread.currentThread().setName( "loop" );
+			Thread.currentThread().setName( String.format( "LOOP@%08x", System.identityHashCode( this ) ) );
 
 			L.info( "Entering loop" );
 
@@ -208,9 +211,11 @@ implements LifeCycle
 	/**
 	 * Starts the server loop.
 	 * 
+	 * @throws IOException
+	 * 
 	 * @see net.pi.sws.pool.LifeCycle#start()
 	 */
-	public synchronized void start()
+	public synchronized void start() throws IOException
 	{
 		if( this.loop != null ) {
 			throw new IllegalStateException();
@@ -221,6 +226,10 @@ implements LifeCycle
 		this.loop = new Loop();
 
 		this.exec.execute( this.loop );
+
+		if( this.fact instanceof LifeCycle ) {
+			((LifeCycle) this.fact).start();
+		}
 	}
 
 	/**
@@ -232,6 +241,10 @@ implements LifeCycle
 	{
 		if( this.loop == null ) {
 			throw new IllegalStateException();
+		}
+
+		if( this.fact instanceof LifeCycle ) {
+			((LifeCycle) this.fact).stop( timeout );
 		}
 
 		L.info( "Stopping pool" );

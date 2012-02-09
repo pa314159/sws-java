@@ -13,6 +13,10 @@
 
 	<name>${project.artifactId}</name>
 
+	<properties>
+		<milton-version>1.6.8</milton-version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>net.pi.sws</groupId>
@@ -21,12 +25,12 @@
 		<dependency>
 			<groupId>com.ettrema</groupId>
 			<artifactId>milton-api</artifactId>
-			<version>1.6.8</version>
+			<version>${milton-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.ettrema</groupId>
 			<artifactId>milton-filesystem</artifactId>
-			<version>1.6.8</version>
+			<version>${milton-version}</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -1,8 +1,8 @@
 
 package net.pi.sws.http;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.nio.channels.SocketChannel;
 import java.util.regex.Pattern;
@@ -18,7 +18,7 @@ import net.pi.sws.util.ExtLog;
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
-public class HttpService
+final class HttpService
 implements Service
 {
 
@@ -52,27 +52,31 @@ implements Service
 		boolean		keepAlive;
 	}
 
-	private static final Pattern	PAT_100_CONTINUE	= Pattern.compile( "100-continue", Pattern.CASE_INSENSITIVE );
+	private static final Pattern		PAT_100_CONTINUE	= Pattern.compile( "100-continue", Pattern.CASE_INSENSITIVE );
 
-	private static final Pattern	PAT_KEEP_ALIVE		= Pattern.compile( "Keep-Alive", Pattern.CASE_INSENSITIVE );
+	private static final Pattern		PAT_KEEP_ALIVE		= Pattern.compile( "Keep-Alive", Pattern.CASE_INSENSITIVE );
 
-	private static final ExtLog		L					= ExtLog.get();
+	private static final ExtLog			L					= ExtLog.get();
 
-	private static final int		TIMEOUT				= 0;
+	private static final int			TIMEOUT				= 0;
 
-	private final File				root;
+	private final ChannelOutput			oc;
 
-	private final ChannelOutput		oc;
+	private final ChannelInput			ic;
 
-	private final ChannelInput		ic;
+	private StateContext				context				= new StateContext();
 
-	private StateContext			context				= new StateContext();
+	private final HttpServiceFactory	fact;
 
-	HttpService( File root, SocketChannel channel ) throws IOException
+	private final InetAddress			from;
+
+	HttpService( HttpServiceFactory fact, SocketChannel channel ) throws IOException
 	{
-		this.root = root;
+		this.fact = fact;
 
 		channel.configureBlocking( false );
+
+		this.from = channel.socket().getInetAddress();
 
 		this.oc = new ChannelOutput( channel, TIMEOUT );
 		this.ic = new ChannelInput( channel, TIMEOUT );
@@ -209,8 +213,8 @@ implements Service
 			break;
 		}
 
-		final HttpRequest request = new HttpRequest( this.ic, URI.create( uri ).getPath() );
-		final HttpResponse response = new HttpResponse( this.oc, this.root );
+		final HttpRequest request = new HttpRequest( this.ic, URI.create( uri ).getPath(), line, this.from );
+		final HttpResponse response = new HttpResponse( this.oc );
 
 		if( method == null ) {
 			if( version == null ) {
@@ -221,7 +225,9 @@ implements Service
 			}
 		}
 		else {
-			this.context.method = MethodFactory.getInstance().get( method, request, response );
+			final MethodFactory mf = this.fact.getMethodFactory();
+
+			this.context.method = mf.get( method, this.fact, request, response );
 		}
 
 		this.context.state = State.HEADER;

@@ -20,7 +20,7 @@ import net.pi.sws.util.ExtLog;
 import net.pi.sws.util.NamedThreadFactory;
 
 /**
- * A generic channel oriented TCP server, listening to a port and spawning accept handlers with each incoming request.
+ * A generic channel based TCP server, listening to a port and spawning accept handlers with each incoming request.
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
@@ -47,6 +47,9 @@ implements LifeCycle
 
 		public void run()
 		{
+			Thread.currentThread().setName(
+				String.format( "accept@%08x@%s", System.identityHashCode( this ), this.chn.socket().getLocalSocketAddress() ) );
+
 			L.info( "Incoming connection from %s", this.chn.socket().getInetAddress() );
 
 			try {
@@ -93,7 +96,7 @@ implements LifeCycle
 		@Override
 		public void run()
 		{
-			Thread.currentThread().setName( "loop" );
+			Thread.currentThread().setName( String.format( "LOOP@%08x", System.identityHashCode( this ) ) );
 
 			L.info( "Entering loop" );
 
@@ -151,8 +154,10 @@ implements LifeCycle
 		final NamedThreadFactory tf = new NamedThreadFactory( "sws-%02d", false );
 
 		// TODO review this
-		this.exec = new ThreadPoolExecutor( 20, 20, 0L, TimeUnit.MILLISECONDS,
-			new ArrayBlockingQueue<Runnable>( 20 ), tf, new RejectPolicy() );
+		final ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>( 20 );
+		final RejectPolicy reject = new RejectPolicy();
+
+		this.exec = new ThreadPoolExecutor( 20, 20, 0L, TimeUnit.MILLISECONDS, queue, tf, reject );
 	}
 
 	/**
@@ -206,9 +211,11 @@ implements LifeCycle
 	/**
 	 * Starts the server loop.
 	 * 
+	 * @throws IOException
+	 * 
 	 * @see net.pi.sws.pool.LifeCycle#start()
 	 */
-	public synchronized void start()
+	public synchronized void start() throws IOException
 	{
 		if( this.loop != null ) {
 			throw new IllegalStateException();
@@ -219,6 +226,10 @@ implements LifeCycle
 		this.loop = new Loop();
 
 		this.exec.execute( this.loop );
+
+		if( this.fact instanceof LifeCycle ) {
+			((LifeCycle) this.fact).start();
+		}
 	}
 
 	/**
@@ -230,6 +241,10 @@ implements LifeCycle
 	{
 		if( this.loop == null ) {
 			throw new IllegalStateException();
+		}
+
+		if( this.fact instanceof LifeCycle ) {
+			((LifeCycle) this.fact).stop( timeout );
 		}
 
 		L.info( "Stopping pool" );

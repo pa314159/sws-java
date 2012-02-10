@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.pi</groupId>
 		<artifactId>sws</artifactId>
-		<version>0.1-SNAPSHOT</version>
+		<version>0.2-SNAPSHOT</version>
 	</parent>
 
 	<groupId>net.pi.sws</groupId>
@@ -20,7 +20,7 @@
 				<artifactId>sws-maven-plugin</artifactId>
 				<version>${project.version}</version>
 				<configuration>
-					<root>web</root>
+					<root>.</root>
 					<port>31416</port>
 				</configuration>
 			</plugin>
@@ -30,7 +30,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.pi.sws</groupId>
-			<artifactId>sws-http</artifactId>
+			<artifactId>sws-http-fs</artifactId>
 		</dependency>
 	</dependencies>
 </project>

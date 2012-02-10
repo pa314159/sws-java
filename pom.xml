@@ -133,8 +133,6 @@
 				<artifactId>sws-http-dav</artifactId>
 				<version>0.2-SNAPSHOT</version>
 			</dependency>
-
-			<!-- internal artefacts -->
 			<dependency>
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-util</artifactId>
@@ -144,13 +142,6 @@
 				<groupId>net.pi.sws</groupId>
 				<artifactId>sws-pool</artifactId>
 				<version>0.2-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>net.pi.sws</groupId>
-				<artifactId>sws-pool</artifactId>
-				<classifier>tests</classifier>
-				<version>0.2-SNAPSHOT</version>
-				<scope>test</scope>
 			</dependency>
 
 			<!-- external dependencies -->
@@ -174,18 +165,23 @@
 				<artifactId>mime-util</artifactId>
 				<version>2.1</version>
 			</dependency>
-
-			<!-- test only dependencies -->
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>2.1</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>4.1.2</version>
+			</dependency>
+
+			<!-- test only dependencies -->
+			<dependency>
+				<groupId>net.pi.sws</groupId>
+				<artifactId>sws-pool</artifactId>
+				<classifier>tests</classifier>
+				<version>0.2-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
@@ -205,6 +201,16 @@
 			<version>4.9</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<distributionManagement>
@@ -218,7 +224,7 @@
 			<uniqueVersion>true</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>
-	
+
 	<inceptionYear>2012</inceptionYear>
 
 	<developers>

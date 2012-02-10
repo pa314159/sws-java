@@ -2,6 +2,7 @@
 package net.pi.sws.util;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
@@ -12,36 +13,65 @@ import java.util.TreeMap;
 public final class Configurator
 {
 
-	private static final Map<Class, Class>	TYPES	= new HashMap<Class, Class>();
+	static private final ExtLog				L			= ExtLog.get();
+
+	static private final Map<Class, Class>	PRIMITIVES	= new HashMap<Class, Class>();
 
 	static {
-		TYPES.put( boolean.class, Boolean.class );
-		TYPES.put( byte.class, Byte.class );
-		TYPES.put( short.class, Short.class );
-		TYPES.put( char.class, Character.class );
-		TYPES.put( int.class, Integer.class );
-		TYPES.put( long.class, Long.class );
-		TYPES.put( float.class, Float.class );
-		TYPES.put( double.class, Double.class );
+		PRIMITIVES.put( boolean.class, Boolean.class );
+		PRIMITIVES.put( byte.class, Byte.class );
+		PRIMITIVES.put( short.class, Short.class );
+		PRIMITIVES.put( char.class, Character.class );
+		PRIMITIVES.put( int.class, Integer.class );
+		PRIMITIVES.put( long.class, Long.class );
+		PRIMITIVES.put( float.class, Float.class );
+		PRIMITIVES.put( double.class, Double.class );
 	}
 
-	public static void configure( Object object, Map<String, Object> configuration ) throws Exception
+	static private Object buildInstance( Class<?> cls ) throws Exception
 	{
-		final BeanInfo bi = Introspector.getBeanInfo( object.getClass() );
-		final PropertyDescriptor[] pdv = bi.getPropertyDescriptors();
+		return cls.newInstance();
+	}
 
-		configuration = split( configuration );
+	static private Object buildInstance( Class<?> cls, Object object ) throws Exception
+	{
+		if( object instanceof String ) {
+			final ClassLoader cld = Thread.currentThread().getContextClassLoader();
 
-		for( final PropertyDescriptor pd : pdv ) {
-			if( pd.getWriteMethod() == null ) {
+			try {
+				return Class.forName( (String) object, true, cld ).newInstance();
+			}
+			catch( final ClassNotFoundException e ) {
+				e.printStackTrace();
+			}
+		}
+
+		for( final Constructor ct : cls.getConstructors() ) {
+			final Class[] types = ct.getParameterTypes();
+
+			if( types.length != 1 ) {
 				continue;
 			}
 
-			configure( object, pd, configuration );
+			Class t = types[0];
+
+			if( t.isInstance( object ) ) {
+				return ct.newInstance( object );
+			}
+
+			if( t.isPrimitive() ) {
+				t = PRIMITIVES.get( t );
+
+				if( t.isInstance( object ) ) {
+					return ct.newInstance( object );
+				}
+			}
 		}
+
+		return null;
 	}
 
-	static Map<String, Object> split( Map<String, Object> configuration )
+	static private Map<String, Object> split( Map<String, Object> configuration )
 	{
 		final Map<String, Object> result = new TreeMap<String, Object>();
 		final Map<String, Map<String, Object>> dots = new TreeMap<String, Map<String, Object>>();
@@ -83,50 +113,35 @@ public final class Configurator
 		return result;
 	}
 
-	private static Object buildInstance( Class<?> cls ) throws Exception
+	private final Map<String, Object>	configuration;
+
+	public Configurator( Map<String, Object> configuration )
 	{
-		return cls.newInstance();
+		this.configuration = split( configuration );
 	}
 
-	private static Object buildInstance( Class<?> cls, Object object ) throws Exception
+	public void configure( Object object ) throws Exception
 	{
-		if( object instanceof String ) {
-			final ClassLoader cld = Thread.currentThread().getContextClassLoader();
-
-			try {
-				return Class.forName( (String) object, true, cld ).newInstance();
-			}
-			catch( final ClassNotFoundException e ) {
-				e.printStackTrace();
-			}
+		if( object != null ) {
+			configureWith( object, object.getClass().getName(), this.configuration );
 		}
+	}
 
-		for( final Constructor ct : cls.getConstructors() ) {
-			final Class[] types = ct.getParameterTypes();
+	private void configureWith( Object object, String base, Map<String, Object> configuration ) throws IntrospectionException, Exception
+	{
+		final BeanInfo bi = Introspector.getBeanInfo( object.getClass() );
+		final PropertyDescriptor[] pdv = bi.getPropertyDescriptors();
 
-			if( types.length != 1 ) {
+		for( final PropertyDescriptor pd : pdv ) {
+			if( pd.getWriteMethod() == null ) {
 				continue;
 			}
 
-			Class t = types[0];
-
-			if( t.isInstance( object ) ) {
-				return ct.newInstance( object );
-			}
-
-			if( t.isPrimitive() ) {
-				t = TYPES.get( t );
-
-				if( t.isInstance( object ) ) {
-					return ct.newInstance( object );
-				}
-			}
+			configureWith( object, base, configuration, pd );
 		}
-
-		return null;
 	}
 
-	private static void configure( Object object, PropertyDescriptor pd, Map<String, Object> configuration ) throws Exception
+	private void configureWith( Object object, String base, Map<String, Object> configuration, PropertyDescriptor pd ) throws Exception
 	{
 		final String name = pd.getName();
 
@@ -135,42 +150,49 @@ public final class Configurator
 		}
 
 		Object set = configuration.get( name );
-		Object val;
+		Object get;
 
 		if( pd.getReadMethod() != null ) {
-			val = pd.getReadMethod().invoke( object );
+			get = pd.getReadMethod().invoke( object );
 		}
 		else {
-			val = null;
+			get = null;
 		}
 
-		if( !pd.getPropertyType().isInstance( set ) ) {
-			if( set instanceof Map ) {
-				final Map<String, Object> sub = (Map<String, Object>) set;
+		final Class<?> pt = pd.getPropertyType();
 
-				if( val == null ) {
-					if( sub.containsKey( "" ) ) {
-						set = buildInstance( pd.getPropertyType(), sub.get( "" ) );
+		if( !pt.isInstance( set ) ) {
+			if( set instanceof Map ) {
+				L.trace( "Found enclosed object %s.%s of type %s", base, name, pt );
+
+				final Map<String, Object> cf = (Map<String, Object>) set;
+
+				if( get == null ) {
+					if( cf.containsKey( "" ) ) {
+						set = buildInstance( pt, cf.get( "" ) );
 					}
 					else {
-						set = buildInstance( pd.getPropertyType() );
+						set = buildInstance( pt );
 					}
 				}
 
 				if( set != null ) {
-					configure( set, sub );
+					configureWith( set, base + "." + name, cf );
 				}
 			}
 			else {
-				return;
+				if( set != null ) {
+					set = buildInstance( pt, set );
+				}
+				else {
+					set = buildInstance( pt );
+				}
 			}
 		}
 
-		pd.getWriteMethod().invoke( object, set );
-	}
+		L.trace( "Initialising %s.%s with %s", base, name, set );
 
-	private Configurator()
-	{
+		pd.getWriteMethod().invoke( object, set );
 	}
 
 }

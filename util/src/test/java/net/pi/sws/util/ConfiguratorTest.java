@@ -4,6 +4,8 @@ package net.pi.sws.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 public class ConfiguratorTest
@@ -12,25 +14,20 @@ public class ConfiguratorTest
 	public static class A
 	{
 
-		B	b;
+		B			b;
+
+		C			c;
+
+		final int	n;
 
 		public A( int n )
 		{
+			this.n = n;
 		}
 
 		public void setB( B b )
 		{
 			this.b = b;
-		}
-	}
-
-	public static class B
-	{
-
-		C	c;
-
-		public B( int n )
-		{
 		}
 
 		public void setC( C c )
@@ -39,11 +36,29 @@ public class ConfiguratorTest
 		}
 	}
 
-	public static class B2
+	public static class B
+	{
+
+		C			c;
+
+		final int	n;
+
+		public B( int n )
+		{
+			this.n = n;
+		}
+
+		public void setC( C c )
+		{
+			this.c = c;
+		}
+	}
+
+	public static class BD
 	extends B
 	{
 
-		public B2()
+		public BD()
 		{
 			super( 0 );
 		}
@@ -52,10 +67,18 @@ public class ConfiguratorTest
 	public static class C
 	{
 
-		D	d;
+		D			d;
+
+		final int	n;
+
+		public C()
+		{
+			this( 0 );
+		}
 
 		public C( int n )
 		{
+			this.n = n;
 		}
 
 		public void setD( D d )
@@ -69,10 +92,6 @@ public class ConfiguratorTest
 
 		E	e;
 
-		public D( int n )
-		{
-		}
-
 		public void setE( E e )
 		{
 			this.e = e;
@@ -82,10 +101,18 @@ public class ConfiguratorTest
 	public static class E
 	{
 
-		F	f;
+		final int	n;
+
+		F			f;
+
+		public E()
+		{
+			this.n = 0;
+		}
 
 		public E( int n )
 		{
+			this.n = n;
 		}
 
 		public void setF( F f )
@@ -99,10 +126,6 @@ public class ConfiguratorTest
 
 		G	g;
 
-		public F( int n )
-		{
-		}
-
 		public void setG( G g )
 		{
 			this.g = g;
@@ -112,8 +135,11 @@ public class ConfiguratorTest
 	public static class G
 	{
 
+		final int	n;
+
 		public G( int n )
 		{
+			this.n = n;
 		}
 	}
 
@@ -122,25 +148,68 @@ public class ConfiguratorTest
 
 		A	a;
 
+		B	b;
+
+		C	c;
+
 		public void setA( A a )
 		{
 			this.a = a;
 		}
+
+		public void setB( B b )
+		{
+			this.b = b;
+		}
+
+		public void setC( C c )
+		{
+			this.c = c;
+		}
 	}
 
 	@Test
-	public void split() throws Exception
+	public void run() throws Exception
 	{
 		final Map<String, Object> m = new HashMap<String, Object>();
 
 		m.put( "a", 1 );
-		m.put( "a.b", B2.class.getName() );
+		m.put( "a.b", BD.class.getName() );
 		m.put( "a.b.c", 3 );
-		m.put( "a.c.d.e.f.g", 4 );
-		m.put( "b", 5 );
+		m.put( "a.c", 4 );
+		m.put( "a.c.d.e.f.g", 5 );
+		m.put( "b", 6 );
 		m.put( "c.d.e", 7 );
 
-		Configurator.configure( new ROOT(), m );
-	}
+		final Configurator c = new Configurator( m );
+		final ROOT o = new ROOT();
 
+		c.configure( o );
+
+		Assert.assertNotNull( o.a );
+		Assert.assertNotNull( o.a.b );
+		Assert.assertNotNull( o.a.b.c );
+		Assert.assertNull( o.a.b.c.d );
+		Assert.assertNotNull( o.a.c );
+		Assert.assertNotNull( o.a.c.d );
+		Assert.assertNotNull( o.a.c.d.e );
+		Assert.assertNotNull( o.a.c.d.e.f );
+		Assert.assertNotNull( o.a.c.d.e.f.g );
+		Assert.assertNotNull( o.b );
+		Assert.assertNull( o.b.c );
+		Assert.assertNotNull( o.c );
+		Assert.assertNotNull( o.c.d );
+		Assert.assertNotNull( o.c.d.e );
+		Assert.assertNull( o.c.d.e.f );
+
+		Assert.assertEquals( 1, o.a.n );
+		Assert.assertEquals( 0, o.a.b.n );
+		Assert.assertEquals( 3, o.a.b.c.n );
+		Assert.assertEquals( 0, o.a.c.d.e.n );
+		Assert.assertEquals( 5, o.a.c.d.e.f.g.n );
+		Assert.assertEquals( 4, o.a.c.n );
+		Assert.assertEquals( 6, o.b.n );
+		Assert.assertEquals( 0, o.c.n );
+		Assert.assertEquals( 7, o.c.d.e.n );
+	}
 }

@@ -4,6 +4,7 @@ package net.pi.sws.dav;
 import java.io.IOException;
 
 import net.pi.sws.http.HttpServiceFactory;
+import net.pi.sws.pool.LifeCycle;
 import net.pi.sws.util.ExtLog;
 
 import com.bradmcevoy.http.AuthenticationService;
@@ -64,5 +65,9 @@ extends HttpServiceFactory
 	public void stop( long timeout ) throws InterruptedException, IOException
 	{
 		L.info( "Stopping DAV" );
+
+		if( (this.hm != null) && (this.hm.getResourceFactory() instanceof LifeCycle) ) {
+			((LifeCycle) this.hm.getResourceFactory()).stop( timeout );
+		}
 	}
 }

@@ -42,7 +42,7 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 
 			return this.byteS = newByteStream( wrap( this.channel ) );
 		}
-		if( this.ioType == IOType.Channel ) {
+		if( this.ioType == IOType.ByteStream ) {
 			return this.byteS;
 		}
 

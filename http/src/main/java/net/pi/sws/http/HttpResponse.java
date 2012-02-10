@@ -109,11 +109,6 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 		return this.status;
 	}
 
-	public HttpCode getStatus()
-	{
-		return this.status;
-	}
-
 	@Override
 	public void setHeader( HttpHeader h )
 	{

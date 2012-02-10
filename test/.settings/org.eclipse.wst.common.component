@@ -2,6 +2,7 @@
 <project-modules id="moduleCoreId" project-version="1.5.0">
     <wb-module deploy-name="sws-test">
         <wb-resource deploy-path="/" source-path="/web"/>
+        <wb-resource deploy-path="/" source-path="/src/main/java"/>
         <property name="context-root" value="sws-test"/>
     </wb-module>
 </project-modules>

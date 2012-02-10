@@ -7,7 +7,10 @@ import java.nio.channels.SocketChannel;
 /**
  * Definition of a service.
  * 
- * <p>The socket channel is passed to both {@link Service#accept(SocketChannel)} and {@link ServiceFactory#create(SocketChannel) methods to allow flexible creation of a service.</p>
+ * <p>
+ * The socket channel is passed to both {@link Service#accept(SocketChannel)} and
+ * {@link ServiceFactory#create(SocketChannel)} methods.
+ * </p>
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */

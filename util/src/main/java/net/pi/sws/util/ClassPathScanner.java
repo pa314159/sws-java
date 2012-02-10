@@ -217,33 +217,40 @@ public class ClassPathScanner
 		}
 
 		if( this.annotations.size() > 0 ) {
-			final ClassFile cf = ClassFile.readFrom( is );
-			final List<TypeDesc> annotations = new ArrayList<TypeDesc>();
+			try {
+				final ClassFile cf = ClassFile.readFrom( is );
+				final List<TypeDesc> annotations = new ArrayList<TypeDesc>();
 
-			for( final Attribute cfa : cf.getAttributes() ) {
-				final String n = cfa.getName();
+				for( final Attribute cfa : cf.getAttributes() ) {
+					final String n = cfa.getName();
 
-				if( !n.equals( Attribute.RUNTIME_VISIBLE_ANNOTATIONS )
-					&& !n.equals( Attribute.RUNTIME_INVISIBLE_ANNOTATIONS ) ) {
-					continue;
+					if( !n.equals( Attribute.RUNTIME_VISIBLE_ANNOTATIONS )
+						&& !n.equals( Attribute.RUNTIME_INVISIBLE_ANNOTATIONS ) ) {
+						continue;
+					}
+
+					final AnnotationsAttr cfaa = (AnnotationsAttr) cfa;
+
+					for( final Annotation an : cfaa.getAnnotations() ) {
+						annotations.add( an.getType() );
+					}
 				}
 
-				final AnnotationsAttr cfaa = (AnnotationsAttr) cfa;
+				boolean included = false;
 
-				for( final Annotation an : cfaa.getAnnotations() ) {
-					annotations.add( an.getType() );
+				for( final TypeDesc a : annotations ) {
+					if( included = this.annotations.contains( a ) ) {
+						break;
+					}
+				}
+
+				if( !included ) {
+					return;
 				}
 			}
+			catch( final IOException e ) {
+				// e.printStackTrace();
 
-			boolean included = false;
-
-			for( final TypeDesc a : annotations ) {
-				if( included = this.annotations.contains( a ) ) {
-					break;
-				}
-			}
-
-			if( !included ) {
 				return;
 			}
 		}

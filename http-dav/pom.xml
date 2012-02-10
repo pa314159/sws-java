@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.pi</groupId>
+		<artifactId>sws</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</parent>
+
+	<groupId>net.pi.sws</groupId>
+	<artifactId>sws-http-dav</artifactId>
+
+	<name>${project.artifactId}</name>
+
+	<properties>
+		<milton-version>1.6.8</milton-version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.pi.sws</groupId>
+			<artifactId>sws-http</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.ettrema</groupId>
+			<artifactId>milton-api</artifactId>
+			<version>${milton-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ettrema</groupId>
+			<artifactId>milton-filesystem</artifactId>
+			<version>${milton-version}</version>
+		</dependency>
+	</dependencies>
+</project>

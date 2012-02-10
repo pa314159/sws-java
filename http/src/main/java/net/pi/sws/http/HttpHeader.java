@@ -2,6 +2,7 @@
 package net.pi.sws.http;
 
 import java.io.UnsupportedEncodingException;
+import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,6 +51,12 @@ public class HttpHeader
 
 		/** <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.36">Section 14.36</a> */
 		String	REFERER			= "Referer";
+
+		/** <a href="http://www.ietf.org/rfc/rfc2109.txt">RFC 2109</a> */
+		String	COOKIE			= "Cookie";
+
+		/** <a href="http://www.ietf.org/rfc/rfc2965.txt">RFC 2965</a> */
+		String	COOKIE_2		= "Cookie2";
 	}
 
 	/**
@@ -66,6 +73,12 @@ public class HttpHeader
 
 		/** <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.38">Section 14.38</a> */
 		String	SERVER			= "Server";
+
+		/** <a href="http://www.ietf.org/rfc/rfc2109.txt">RFC 2109</a> */
+		String	SET_COOKIE		= "Set-Cookie";
+
+		/** <a href="http://www.ietf.org/rfc/rfc2965.txt">RFC 2965</a> */
+		String	SET_COOKIE_2	= "Set-Cookie2";
 	}
 
 	static HttpHeader parse( String line ) throws UnsupportedEncodingException
@@ -144,6 +157,24 @@ public class HttpHeader
 		for( final String v : values ) {
 			addValue( v.trim() );
 		}
+	}
+
+	HttpHeader( HttpCookie c )
+	{
+		switch( c.getVersion() ) {
+			case 0:
+				this.name = Response.SET_COOKIE;
+			break;
+
+			case 1:
+				this.name = Response.SET_COOKIE_2;
+			break;
+
+			default:
+				throw new IllegalArgumentException( c.toString() );
+		}
+
+		this.values.add( c.toString() );
 	}
 
 	public void addValue( int value )

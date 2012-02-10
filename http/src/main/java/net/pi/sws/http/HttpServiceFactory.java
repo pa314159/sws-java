@@ -57,7 +57,9 @@ implements ServiceFactory, LifeCycle
 		try {
 			configuration.remove( DEFAULT );
 
-			Configurator.configure( sf, configuration );
+			final Configurator c = new Configurator( configuration );
+
+			c.configure( sf );
 		}
 		catch( final Exception e ) {
 			L.warn( "Cannot configure factory %s", e, sfName );

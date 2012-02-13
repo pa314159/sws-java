@@ -51,6 +51,16 @@ extends HttpMessage<ReadableByteChannel, InputStream, Reader>
 			this.in.close();
 		}
 
+		public void consume() throws IOException
+		{
+			final int z = Math.max( this.expected, 8192 );
+			final ByteBuffer b = ByteBuffer.allocate( z );
+
+			while( read( b ) > 0 ) {
+				b.flip();
+			}
+		}
+
 		@Override
 		public boolean isOpen()
 		{
@@ -118,6 +128,15 @@ extends HttpMessage<ReadableByteChannel, InputStream, Reader>
 	public String getURI()
 	{
 		return this.uri;
+	}
+
+	void consumeInput() throws IOException
+	{
+		final ReadableByteChannel w = wrap();
+
+		if( w instanceof LimitedChannelInput ) {
+			((LimitedChannelInput) w).consume();
+		}
 	}
 
 	@Override

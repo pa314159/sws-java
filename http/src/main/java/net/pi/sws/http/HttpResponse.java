@@ -71,9 +71,9 @@ extends HttpMessage<WritableByteChannel, OutputStream, Writer>
 
 	private BufferedChannelOutput		buffered;
 
-	CompressionType						compression;
-
 	private DeflaterChannelOutput		compressed;
+
+	CompressionType						compression;
 
 	private final List<HttpCookie>		cookies	= new ArrayList<HttpCookie>();
 

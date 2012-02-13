@@ -38,6 +38,7 @@ public abstract class HttpMethod<F extends HttpServiceFactory>
 
 	void flush() throws IOException
 	{
+		this.request.consumeInput();
 		this.response.flush();
 	}
 

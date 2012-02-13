@@ -22,9 +22,11 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 
 	private final Map<String, HttpHeader>	headers	= new HashMap<String, HttpHeader>();
 
+	private IOType							ioType;
+
 	private final C							channel;
 
-	private IOType							ioType;
+	private C								wrapped;
 
 	private S								byteS;
 
@@ -40,7 +42,7 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		if( this.ioType == null ) {
 			this.ioType = IOType.ByteStream;
 
-			return this.byteS = newByteStream( wrap( this.channel ) );
+			return this.byteS = newByteStream( wrap() );
 		}
 		if( this.ioType == IOType.ByteStream ) {
 			return this.byteS;
@@ -54,10 +56,10 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		if( this.ioType == null ) {
 			this.ioType = IOType.Channel;
 
-			return wrap( this.channel );
+			return wrap();
 		}
 		if( this.ioType == IOType.Channel ) {
-			return this.channel;
+			return wrap();
 		}
 
 		throw new IllegalStateException( String.format( "Already called get%s()", this.ioType ) );
@@ -68,7 +70,7 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 		if( this.ioType == null ) {
 			this.ioType = IOType.CharStream;
 
-			return this.charS = newCharStream( newByteStream( wrap( this.channel ) ), cs );
+			return this.charS = newCharStream( newByteStream( wrap() ), cs );
 		}
 		if( this.ioType == IOType.CharStream ) {
 			return this.charS;
@@ -122,6 +124,15 @@ abstract class HttpMessage<C extends Channel, S extends Closeable, R extends Clo
 	abstract S newByteStream( C channel ) throws IOException;
 
 	abstract R newCharStream( S stream, Charset cs );
+
+	C wrap() throws IOException
+	{
+		if( this.wrapped == null ) {
+			this.wrapped = wrap( this.channel );
+		}
+
+		return this.wrapped;
+	}
 
 	C wrap( C channel ) throws IOException
 	{

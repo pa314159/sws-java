@@ -13,5 +13,5 @@ public interface LifeCycle
 
 	void start() throws IOException;
 
-	void stop( long timeout ) throws InterruptedException, IOException;
+	void stop( long timeout );
 }

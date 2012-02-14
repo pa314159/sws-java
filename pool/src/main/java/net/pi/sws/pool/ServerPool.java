@@ -170,13 +170,7 @@ implements LifeCycle
 			@Override
 			public void run()
 			{
-				try {
-					ServerPool.this.stop( 500 );
-				}
-				catch( final InterruptedException e ) {
-				}
-				catch( final IOException e ) {
-				}
+				ServerPool.this.stop( 500 );
 			}
 		};
 
@@ -272,7 +266,7 @@ implements LifeCycle
 	 * 
 	 * @see net.pi.sws.pool.LifeCycle#stop(long)
 	 */
-	public synchronized void stop( long timeout ) throws InterruptedException, IOException
+	public synchronized void stop( long timeout )
 	{
 		if( this.main == null ) {
 			// throw new IllegalStateException( "The pool hasn't been started" );
@@ -288,18 +282,37 @@ implements LifeCycle
 		this.exec.shutdown();
 
 		for( final SelectionKey sk : this.sel.keys() ) {
-			sk.channel().close();
+			try {
+				sk.channel().close();
+			}
+			catch( final IOException e ) {
+				;
+			}
 		}
 
-		this.sel.close();
+		try {
+			this.sel.close();
+		}
+		catch( final IOException e ) {
+			;
+		}
 
-		this.exec.awaitTermination( timeout, TimeUnit.MILLISECONDS );
+		try {
+			this.exec.awaitTermination( timeout, TimeUnit.MILLISECONDS );
+		}
+		catch( final InterruptedException e ) {
+			;
+		}
+
 		this.exec.shutdownNow();
 
 		try {
 			this.main.get();
 		}
 		catch( final ExecutionException e ) {
+			;
+		}
+		catch( final InterruptedException e ) {
 			;
 		}
 

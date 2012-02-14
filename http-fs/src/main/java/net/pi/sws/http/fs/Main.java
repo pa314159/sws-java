@@ -17,32 +17,6 @@ import net.pi.sws.util.ExtLog;
 public class Main
 {
 
-	static class ShutdownHook
-	extends Thread
-	{
-
-		private final ServerPool	pool;
-
-		ShutdownHook( ServerPool pool )
-		{
-			this.pool = pool;
-		}
-
-		@Override
-		public void run()
-		{
-			try {
-				this.pool.stop( 500 );
-			}
-			catch( final InterruptedException e ) {
-				L.error( "stop hook", e );
-			}
-			catch( final IOException e ) {
-				L.error( "stop hook", e );
-			}
-		}
-	}
-
 	static private final ExtLog	L	= ExtLog.get();
 
 	static public void main( String[] args ) throws IOException
@@ -83,12 +57,11 @@ public class Main
 		final FsHttpServiceFactory fact = new FsHttpServiceFactory( root );
 
 		this.pool = new ServerPool( bind, fact );
-
-		Runtime.getRuntime().addShutdownHook( new ShutdownHook( this.pool ) );
 	}
 
 	private void go() throws IOException
 	{
 		this.pool.start();
+		this.pool.addShutdownHook();
 	}
 }

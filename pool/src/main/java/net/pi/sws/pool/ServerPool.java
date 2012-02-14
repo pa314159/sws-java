@@ -11,6 +11,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +26,7 @@ import net.pi.sws.util.NamedThreadFactory;
  * 
  * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
  */
-public class ServerPool
+public final class ServerPool
 implements LifeCycle
 {
 
@@ -85,34 +87,6 @@ implements LifeCycle
 	}
 
 	/**
-	 * This is the listener loop, it uses one thread from the thread pool.
-	 * 
-	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
-	 */
-	class Loop
-	implements Runnable
-	{
-
-		@Override
-		public void run()
-		{
-			Thread.currentThread().setName( String.format( "LOOP@%08x", System.identityHashCode( this ) ) );
-
-			L.info( "Entering loop" );
-
-			try {
-				loop();
-			}
-			catch( final IOException e ) {
-				L.error( "error in loop", e );
-			}
-			finally {
-				L.info( "Loop exited" );
-			}
-		}
-	}
-
-	/**
 	 * Rejection policy for thread pool, it simply closes the connection.
 	 * 
 	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
@@ -130,6 +104,34 @@ implements LifeCycle
 		}
 	}
 
+	/**
+	 * This is the listener loop, it uses one thread from the thread pool.
+	 * 
+	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
+	 */
+	class SelectTask
+	implements Runnable
+	{
+
+		@Override
+		public void run()
+		{
+			Thread.currentThread().setName( String.format( "LOOP@%08x", System.identityHashCode( this ) ) );
+
+			L.info( "Entering loop" );
+
+			try {
+				select();
+			}
+			catch( final IOException e ) {
+				L.error( "error in loop", e );
+			}
+			finally {
+				L.info( "SelectTask exited" );
+			}
+		}
+	}
+
 	static final ExtLog					L	= ExtLog.get();
 
 	private final ThreadPoolExecutor	exec;
@@ -138,7 +140,7 @@ implements LifeCycle
 
 	private final ServiceFactory		fact;
 
-	private Loop						loop;
+	private Future<?>					main;
 
 	private final SocketAddress			address;
 
@@ -158,6 +160,27 @@ implements LifeCycle
 		final RejectPolicy reject = new RejectPolicy();
 
 		this.exec = new ThreadPoolExecutor( 20, 20, 0L, TimeUnit.MILLISECONDS, queue, tf, reject );
+	}
+
+	public void addShutdownHook()
+	{
+		final Thread hook = new Thread()
+		{
+
+			@Override
+			public void run()
+			{
+				try {
+					ServerPool.this.stop( 500 );
+				}
+				catch( final InterruptedException e ) {
+				}
+				catch( final IOException e ) {
+				}
+			}
+		};
+
+		Runtime.getRuntime().addShutdownHook( hook );
 	}
 
 	/**
@@ -197,6 +220,20 @@ implements LifeCycle
 		return this.exec.getCorePoolSize();
 	}
 
+	public void join() throws InterruptedException
+	{
+		if( this.main == null ) {
+			throw new IllegalStateException( "The pool hasn't been started" );
+		}
+
+		try {
+			this.main.get();
+		}
+		catch( final ExecutionException e ) {
+			;
+		}
+	}
+
 	public void setKeepAliveTime( long time, TimeUnit unit )
 	{
 		this.exec.setKeepAliveTime( time, unit );
@@ -217,15 +254,13 @@ implements LifeCycle
 	 */
 	public synchronized void start() throws IOException
 	{
-		if( this.loop != null ) {
-			throw new IllegalStateException();
+		if( this.main != null ) {
+			throw new IllegalStateException( "The pool has been already started" );
 		}
 
 		L.info( "Starting pool" );
 
-		this.loop = new Loop();
-
-		this.exec.execute( this.loop );
+		this.main = this.exec.submit( new SelectTask() );
 
 		if( this.fact instanceof LifeCycle ) {
 			((LifeCycle) this.fact).start();
@@ -239,8 +274,9 @@ implements LifeCycle
 	 */
 	public synchronized void stop( long timeout ) throws InterruptedException, IOException
 	{
-		if( this.loop == null ) {
-			throw new IllegalStateException();
+		if( this.main == null ) {
+			// throw new IllegalStateException( "The pool hasn't been started" );
+			return;
 		}
 
 		if( this.fact instanceof LifeCycle ) {
@@ -260,10 +296,17 @@ implements LifeCycle
 		this.exec.awaitTermination( timeout, TimeUnit.MILLISECONDS );
 		this.exec.shutdownNow();
 
+		try {
+			this.main.get();
+		}
+		catch( final ExecutionException e ) {
+			;
+		}
+
 		L.info( "Stopped" );
 	}
 
-	void loop() throws IOException
+	void select() throws IOException
 	{
 		while( !Thread.interrupted() ) {
 			try {

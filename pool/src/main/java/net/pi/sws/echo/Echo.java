@@ -6,7 +6,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import net.pi.sws.pool.ServerPool;
-import net.pi.sws.util.ExtLog;
 
 /**
  * Main class for {@link EchoService}.
@@ -16,35 +15,7 @@ import net.pi.sws.util.ExtLog;
 public class Echo
 {
 
-	static class ShutdownHook
-	extends Thread
-	{
-
-		private final ServerPool	pool;
-
-		ShutdownHook( ServerPool pool )
-		{
-			this.pool = pool;
-		}
-
-		@Override
-		public void run()
-		{
-			try {
-				this.pool.stop( 500 );
-			}
-			catch( final InterruptedException e ) {
-				L.error( "stop hook", e );
-			}
-			catch( final IOException e ) {
-				L.error( "stop hook", e );
-			}
-		}
-	}
-
-	static private final ExtLog	L	= ExtLog.get();
-
-	static public void main( String[] args ) throws IOException
+	static public void main( String[] args ) throws IOException, InterruptedException
 	{
 		final String host;
 		final int port;
@@ -81,8 +52,10 @@ public class Echo
 		this.pool = new ServerPool( bind, fact );
 	}
 
-	private void go() throws IOException
+	private void go() throws IOException, InterruptedException
 	{
 		this.pool.start();
+		this.pool.addShutdownHook();
+		this.pool.join();
 	}
 }

@@ -130,7 +130,7 @@ implements ServiceFactory, LifeCycle
 	}
 
 	@Override
-	public void stop( long timeout ) throws InterruptedException, IOException
+	public void stop( long timeout )
 	{
 		L.info( "Stopping %s", HttpResponse.SIGNATURE );
 	}

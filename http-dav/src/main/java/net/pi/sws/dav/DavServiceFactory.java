@@ -62,7 +62,7 @@ extends HttpServiceFactory
 	}
 
 	@Override
-	public void stop( long timeout ) throws InterruptedException, IOException
+	public void stop( long timeout )
 	{
 		L.info( "Stopping DAV" );
 

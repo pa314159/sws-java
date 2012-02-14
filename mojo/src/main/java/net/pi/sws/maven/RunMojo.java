@@ -47,9 +47,9 @@ extends AbstractMojo
 	private int					port;
 
 	/**
-	 * @parameter expression="${sws.wait}" default-value="false"
+	 * @parameter expression="${sws.join}" default-value="false"
 	 */
-	private boolean				wait;
+	private boolean				join;
 
 	/**
 	 * @parameter expression="${sws.host}" default-value="127.0.0.1"
@@ -126,43 +126,17 @@ extends AbstractMojo
 			final ServerPool pool = new ServerPool( bind, fact );
 
 			pool.start();
+			pool.addShutdownHook();
 
-			final Thread hook = new Thread()
-			{
-
-				@Override
-				public void run()
-				{
-					try {
-						pool.stop( 500 );
-					}
-					catch( final InterruptedException e ) {
-					}
-					catch( final IOException e ) {
-					}
-					finally {
-						synchronized( pool ) {
-							pool.notify();
-						}
-					}
-				}
-			};
-
-			Runtime.getRuntime().addShutdownHook( hook );
-
-			if( this.wait ) {
-				synchronized( pool ) {
-					try {
-						pool.wait();
-					}
-					catch( final InterruptedException e ) {
-						;
-					}
-				}
+			if( this.join ) {
+				pool.join();
 			}
 		}
 		catch( final IOException e ) {
 			throw new MojoExecutionException( "Cannot start SWS", e );
+		}
+		catch( final InterruptedException e ) {
+			throw new MojoExecutionException( "Cannot wait for SWS termination", e );
 		}
 	}
 }

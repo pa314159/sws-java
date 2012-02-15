@@ -11,8 +11,6 @@ import java.util.Map;
 
 import net.pi.sws.http.HttpHeader;
 import net.pi.sws.http.HttpRequest;
-import net.pi.sws.http.HttpResponse;
-
 import com.bradmcevoy.http.AbstractRequest;
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.Cookie;
@@ -27,8 +25,6 @@ extends AbstractRequest
 
 	private final HttpRequest	request;
 
-	private final HttpResponse	response;
-
 	private Auth				auth;
 
 	private Map<String, Cookie>	cookies;
@@ -37,13 +33,12 @@ extends AbstractRequest
 	{
 		this.method = method;
 		this.request = method.getRequest();
-		this.response = method.getResponse();
 	}
 
 	@Override
 	public String getAbsoluteUrl()
 	{
-		return this.request.getURI();
+		return this.request.getURL().toExternalForm();
 	}
 
 	@Override
@@ -67,7 +62,7 @@ extends AbstractRequest
 	@Override
 	public String getFromAddress()
 	{
-		return this.request.getRemoteAddress().getCanonicalHostName();
+		return this.request.getRemoteAddress().getHostName();
 	}
 
 	@Override
@@ -97,7 +92,7 @@ extends AbstractRequest
 	@Override
 	public String getRemoteAddr()
 	{
-		return this.request.getRemoteAddress().getHostAddress();
+		return this.request.getRemoteAddress().getAddress().getHostAddress();
 	}
 
 	@Override

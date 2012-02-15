@@ -3,6 +3,7 @@ package net.pi.sws.http;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.channels.SocketChannel;
 import java.util.regex.Pattern;
@@ -68,7 +69,9 @@ implements Service
 
 	private final HttpServiceFactory	fact;
 
-	private final InetAddress			from;
+	private final InetSocketAddress		remote;
+
+	private final InetSocketAddress		local;
 
 	HttpService( HttpServiceFactory fact, SocketChannel channel ) throws IOException
 	{
@@ -76,7 +79,8 @@ implements Service
 
 		channel.configureBlocking( false );
 
-		this.from = channel.socket().getInetAddress();
+		this.remote = (InetSocketAddress) channel.socket().getRemoteSocketAddress();
+		this.local = (InetSocketAddress) channel.socket().getLocalSocketAddress();
 
 		this.oc = new ChannelOutput( channel, TIMEOUT );
 		this.ic = new ChannelInput( channel, TIMEOUT );
@@ -213,7 +217,7 @@ implements Service
 			break;
 		}
 
-		final HttpRequest request = new HttpRequest( this.ic, URI.create( uri ).getPath(), line, this.from );
+		final HttpRequest request = new HttpRequest( this.ic, URI.create( uri ).getPath(), line, this.local, this.remote );
 		final HttpResponse response = new HttpResponse( this.oc );
 
 		if( method == null ) {

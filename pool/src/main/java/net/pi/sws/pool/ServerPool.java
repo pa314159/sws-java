@@ -9,6 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -123,8 +124,8 @@ implements LifeCycle
 			try {
 				select();
 			}
-			catch( final IOException e ) {
-				L.error( "error in loop", e );
+			catch( final Throwable t ) {
+				L.error( "error in loop", t );
 			}
 			finally {
 				L.info( "SelectTask exited" );
@@ -144,14 +145,22 @@ implements LifeCycle
 
 	private final SocketAddress			address;
 
+	private final SelectorProvider		sp;
+
 	public ServerPool( SocketAddress a, ServiceFactory fact ) throws IOException
 	{
+		this( a, fact, SelectorProvider.provider() );
+	}
+
+	public ServerPool( SocketAddress a, ServiceFactory fact, SelectorProvider sp ) throws IOException
+	{
 		this.address = a;
-		this.sel = Selector.open();
+		this.fact = fact;
+		this.sp = sp != null ? sp : SelectorProvider.provider();
+
+		this.sel = sp.openSelector();
 
 		bind( a );
-
-		this.fact = fact;
 
 		final NamedThreadFactory tf = new NamedThreadFactory( "sws-%02d", false );
 
@@ -185,7 +194,7 @@ implements LifeCycle
 	 */
 	public void bind( SocketAddress address ) throws IOException
 	{
-		final ServerSocketChannel chn = ServerSocketChannel.open();
+		final ServerSocketChannel chn = this.sp.openServerSocketChannel();
 
 		L.info( "Binding to %s", address );
 

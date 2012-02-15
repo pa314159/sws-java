@@ -4,6 +4,7 @@ package net.pi.sws.pool;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
 
 import net.pi.sws.echo.EchoServiceFactory;
 import net.pi.sws.util.ValidReference;
@@ -21,7 +22,7 @@ implements ServiceFactory
 
 	protected ServerPool								pool;
 
-	protected ServiceFactory							fact	= new EchoServiceFactory();
+	private ServiceFactory								fact;
 
 	public Service create( SocketChannel channel ) throws IOException
 	{
@@ -35,7 +36,8 @@ implements ServiceFactory
 	@Before
 	public void setUp() throws IOException
 	{
-		this.pool = new ServerPool( address, this );
+		this.fact = factory();
+		this.pool = new ServerPool( address, this, provider() );
 
 		this.pool.start();
 	}
@@ -46,5 +48,18 @@ implements ServiceFactory
 		if( this.pool != null ) {
 			this.pool.stop( 500 );
 		}
+
+		this.pool = null;
+		this.fact = null;
+	}
+
+	protected ServiceFactory factory() throws IOException
+	{
+		return new EchoServiceFactory();
+	}
+
+	protected SelectorProvider provider() throws IOException
+	{
+		return SelectorProvider.provider();
 	}
 }

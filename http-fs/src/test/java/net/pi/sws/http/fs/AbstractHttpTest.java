@@ -5,11 +5,11 @@ import java.io.File;
 import java.io.IOException;
 
 import net.pi.sws.pool.AbstractServerTest;
+import net.pi.sws.pool.ServiceFactory;
 
 import org.apache.http.HttpHost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 
 public abstract class AbstractHttpTest
@@ -38,12 +38,9 @@ extends AbstractServerTest
 	}
 
 	@Override
-	@Before
-	public void setUp() throws IOException
+	protected ServiceFactory factory() throws IOException
 	{
-		this.fact = new FsHttpServiceFactory( root() );
-
-		super.setUp();
+		return new FsHttpServiceFactory( root() );
 	}
 
 	protected File root() throws IOException

@@ -6,7 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpCookie;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -30,16 +31,25 @@ extends HttpMessage<ReadableByteChannel, InputStream, Reader>
 
 	final String							requestLine;
 
-	private final InetAddress				remote;
+	private final InetSocketAddress			local;
+
+	private final InetSocketAddress			remote;
 
 	private final Map<String, HttpCookie>	cookies	= new HashMap<String, HttpCookie>();
 
-	HttpRequest( ReadableByteChannel channel, String uri, String requestLine, InetAddress remote )
+	private final URL						url;
+
+	HttpRequest( ReadableByteChannel channel, String uri, String request, InetSocketAddress local, InetSocketAddress remote )
+	throws IOException
 	{
 		super( channel );
 
 		this.uri = uri;
-		this.requestLine = requestLine;
+		this.url = new URL( "http", local.getHostName(), local.getPort(), uri );
+
+		this.requestLine = request;
+
+		this.local = local;
 		this.remote = remote;
 
 		parseCookies( HttpHeader.Request.COOKIE );
@@ -56,7 +66,12 @@ extends HttpMessage<ReadableByteChannel, InputStream, Reader>
 		return this.cookies.values();
 	}
 
-	public InetAddress getRemoteAddress()
+	public InetSocketAddress getLocalAddress()
+	{
+		return this.local;
+	}
+
+	public InetSocketAddress getRemoteAddress()
 	{
 		return this.remote;
 	}
@@ -64,6 +79,11 @@ extends HttpMessage<ReadableByteChannel, InputStream, Reader>
 	public String getURI()
 	{
 		return this.uri;
+	}
+
+	public URL getURL()
+	{
+		return this.url;
 	}
 
 	void consumeInput() throws IOException

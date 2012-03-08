@@ -4,6 +4,7 @@ package net.pi.sws.pool;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -123,6 +124,9 @@ implements LifeCycle
 
 			try {
 				select();
+			}
+			catch( final ClosedSelectorException e ) {
+				L.info( "selected channel closed" );
 			}
 			catch( final ClosedChannelException e ) {
 				L.info( "selected channel closed" );

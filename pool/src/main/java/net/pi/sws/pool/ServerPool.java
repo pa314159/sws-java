@@ -4,7 +4,6 @@ package net.pi.sws.pool;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.ClosedChannelException;
-import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -43,7 +42,8 @@ implements LifeCycle
 
 		private final SocketChannel	chn;
 
-		public Handler( SelectionKey sk ) throws IOException
+		public Handler( SelectionKey sk )
+		throws IOException
 		{
 			this.chn = ((ServerSocketChannel) sk.channel()).accept();
 		}
@@ -124,6 +124,9 @@ implements LifeCycle
 			try {
 				select();
 			}
+			catch( final ClosedChannelException e ) {
+				L.info( "selected channel closed" );
+			}
 			catch( final Throwable t ) {
 				L.error( "error in loop", t );
 			}
@@ -147,12 +150,14 @@ implements LifeCycle
 
 	private final SelectorProvider		sp;
 
-	public ServerPool( SocketAddress a, ServiceFactory fact ) throws IOException
+	public ServerPool( SocketAddress a, ServiceFactory fact )
+	throws IOException
 	{
 		this( a, fact, SelectorProvider.provider() );
 	}
 
-	public ServerPool( SocketAddress a, ServiceFactory fact, SelectorProvider sp ) throws IOException
+	public ServerPool( SocketAddress a, ServiceFactory fact, SelectorProvider sp )
+	throws IOException
 	{
 		this.address = a;
 		this.fact = fact;
@@ -192,7 +197,8 @@ implements LifeCycle
 	 * @param address
 	 * @throws IOException
 	 */
-	public void bind( SocketAddress address ) throws IOException
+	public void bind( SocketAddress address )
+	throws IOException
 	{
 		final ServerSocketChannel chn = this.sp.openServerSocketChannel();
 
@@ -223,7 +229,8 @@ implements LifeCycle
 		return this.exec.getCorePoolSize();
 	}
 
-	public void join() throws InterruptedException
+	public void join()
+	throws InterruptedException
 	{
 		if( this.main == null ) {
 			throw new IllegalStateException( "The pool hasn't been started" );
@@ -255,7 +262,8 @@ implements LifeCycle
 	 * 
 	 * @see net.pi.sws.pool.LifeCycle#start()
 	 */
-	public synchronized void start() throws IOException
+	public synchronized void start()
+	throws IOException
 	{
 		if( this.main != null ) {
 			throw new IllegalStateException( "The pool has been already started" );
@@ -328,16 +336,12 @@ implements LifeCycle
 		L.info( "Stopped" );
 	}
 
-	void select() throws IOException
+	void select()
+	throws IOException
 	{
 		while( !Thread.interrupted() ) {
-			try {
-				if( this.sel.select() == 0 ) {
-					continue;
-				}
-			}
-			catch( final ClosedSelectorException e ) {
-				break;
+			if( this.sel.select() == 0 ) {
+				continue;
 			}
 
 			final Iterator<SelectionKey> it = this.sel.selectedKeys().iterator();
@@ -347,7 +351,9 @@ implements LifeCycle
 
 				it.remove();
 
-				this.exec.execute( new Handler( sk ) );
+				if( sk.isValid() ) {
+					this.exec.execute( new Handler( sk ) );
+				}
 			}
 		}
 	}

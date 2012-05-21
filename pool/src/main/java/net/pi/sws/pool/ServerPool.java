@@ -32,8 +32,10 @@ implements LifeCycle
 {
 
 	/**
-	 * The accept handler. Upon each incoming request, the server "accepts" the request and configure the channel in
-	 * non-blocking mode..
+	 * The accept handler.
+	 * <p>
+	 * Upon each incoming request, the server "accepts" the request and configure the channel in non-blocking mode..
+	 * </p>
 	 * 
 	 * @author PAPPY <a href="mailto:pa314159&#64;gmail.com">&lt;pa314159&#64;gmail.com&gt;</a>
 	 */
@@ -49,6 +51,7 @@ implements LifeCycle
 			this.chn = ((ServerSocketChannel) sk.channel()).accept();
 		}
 
+		@Override
 		public void run()
 		{
 			Thread.currentThread().setName(
@@ -126,10 +129,20 @@ implements LifeCycle
 				select();
 			}
 			catch( final ClosedSelectorException e ) {
-				L.info( "selected channel closed" );
+				if( L.isEnabled( ExtLog.Level.DEBUG ) ) {
+					L.debug( "channel selector closed", e );
+				}
+				else {
+					L.info( "channel selector closed" );
+				}
 			}
 			catch( final ClosedChannelException e ) {
-				L.info( "selected channel closed" );
+				if( L.isEnabled( ExtLog.Level.DEBUG ) ) {
+					L.debug( "selected channel closed", e );
+				}
+				else {
+					L.info( "selected channel closed" );
+				}
 			}
 			catch( final Throwable t ) {
 				L.error( "error in loop", t );
@@ -266,6 +279,7 @@ implements LifeCycle
 	 * 
 	 * @see net.pi.sws.pool.LifeCycle#start()
 	 */
+	@Override
 	public synchronized void start()
 	throws IOException
 	{
@@ -287,6 +301,7 @@ implements LifeCycle
 	 * 
 	 * @see net.pi.sws.pool.LifeCycle#stop(long)
 	 */
+	@Override
 	public synchronized void stop( long timeout )
 	{
 		if( this.main == null ) {
